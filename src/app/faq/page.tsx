@@ -64,20 +64,20 @@ function FAQItem({ question, answer, isOpen, onClick }: {
   onClick: () => void
 }) {
   return (
-    <div className="border border-gray-200 rounded-lg">
+    <div className="border border-gray-200 rounded-xl overflow-hidden transition-all duration-200 hover:shadow-md">
       <button
         onClick={onClick}
         className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 transition-colors"
       >
         <span className="font-medium text-gray-900">{question}</span>
         {isOpen ? (
-          <ChevronUp className="text-green-600 flex-shrink-0 ml-2" size={20} />
+          <ChevronUp className="text-green-600 flex-shrink-0 ml-2 transition-transform duration-200" size={20} />
         ) : (
-          <ChevronDown className="text-gray-400 flex-shrink-0 ml-2" size={20} />
+          <ChevronDown className="text-gray-400 flex-shrink-0 ml-2 transition-transform duration-200" size={20} />
         )}
       </button>
       {isOpen && (
-        <div className="px-6 pb-4">
+        <div className="px-6 pb-4 bg-gray-50/50">
           <p className="text-gray-600 leading-relaxed">{answer}</p>
         </div>
       )}
@@ -97,34 +97,84 @@ export default function FAQPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50">
       <Header />
       
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-green-600 to-green-800 text-white py-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl font-bold mb-4">Frequently Asked Questions</h1>
-          <p className="text-xl opacity-90">
+      <section className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-700 text-white py-16 relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-6">
+            <span className="text-3xl">❓</span>
+          </div>
+          <h1 className="text-5xl font-bold mb-6">Frequently Asked Questions</h1>
+          <p className="text-xl opacity-90 max-w-2xl mx-auto">
             Everything you need to know about using Barsha safely and effectively
           </p>
         </div>
       </section>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Mission Section */}
-        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-8 mb-8">
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-xl border border-white/20 p-8 mb-8">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Our Mission</h2>
+            <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <span className="text-white text-2xl">🌱</span>
+            </div>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-4">Our Mission</h2>
             <p className="text-gray-600 text-lg leading-relaxed">
               Barsha aims to create a more sustainable Tunisia by connecting communities 
-              through food sharing. Every shared meal reduces waste and strengthens the bonds 
-              between neighbors.
+              through food sharing. Every shared meal reduces food waste and strengthens the bonds 
+              between neighbors, building a more caring and environmentally conscious community.
+            </p>
+          </div>
+          
+          {/* How It Works Section */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+            <div className="text-center">
+              <div className="bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-md">
+                <Users className="text-green-600" size={32} />
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">How to Donate Food</h3>
+              <p className="text-gray-600 text-sm">
+                Post your surplus food with details about quantity, expiry, and pickup instructions.
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <div className="bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-md">
+                <Heart className="text-blue-600" size={32} />
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">How to Request Food</h3>
+              <p className="text-gray-600 text-sm">
+                Browse available items and contact donors directly to arrange pickup.
+              </p>
+            </div>
+            
+            <div className="text-center">
+              <div className="bg-gradient-to-br from-amber-100 to-yellow-100 rounded-xl w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-md">
+                <Shield className="text-amber-600" size={32} />
+              </div>
+              <h3 className="font-semibold text-gray-900 mb-2">Food Safety Guidelines</h3>
+              <p className="text-gray-600 text-sm">
+                Follow our safety guidelines to ensure all shared food is safe and fresh.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Why Barsha Section */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-xl border border-white/20 p-8 mb-8">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">Why Choose Barsha?</h2>
+            <p className="text-gray-600 text-lg leading-relaxed">
+              Join thousands of Tunisians who are making a difference in their communities
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
-              <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+              <div className="bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl w-16 h-16 flex items-center justify-center mx-auto mb-3 shadow-md">
                 <Leaf className="text-green-600" size={24} />
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Reduce Waste</h3>
@@ -134,7 +184,7 @@ export default function FAQPage() {
             </div>
             
             <div className="text-center">
-              <div className="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+              <div className="bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl w-16 h-16 flex items-center justify-center mx-auto mb-3 shadow-md">
                 <Users className="text-blue-600" size={24} />
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Build Community</h3>
@@ -144,7 +194,7 @@ export default function FAQPage() {
             </div>
             
             <div className="text-center">
-              <div className="bg-red-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
+              <div className="bg-gradient-to-br from-red-100 to-pink-100 rounded-xl w-16 h-16 flex items-center justify-center mx-auto mb-3 shadow-md">
                 <Heart className="text-red-600" size={24} />
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Help Others</h3>
@@ -156,16 +206,18 @@ export default function FAQPage() {
         </div>
 
         {/* Safety Guidelines */}
-        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-8 mb-8">
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-xl border border-white/20 p-8 mb-8">
           <div className="flex items-center mb-6">
-            <Shield className="text-green-600 mr-3" size={24} />
-            <h2 className="text-2xl font-bold text-gray-900">Food Safety Guidelines</h2>
+            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center mr-4 shadow-lg">
+              <Shield className="text-white" size={20} />
+            </div>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Food Safety Guidelines</h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {safetyTips.map((tip, index) => (
               <div key={index} className="flex items-start">
-                <div className="bg-green-100 rounded-full w-6 h-6 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0">
+                <div className="bg-gradient-to-br from-green-100 to-emerald-100 rounded-full w-6 h-6 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0 shadow-sm">
                   <span className="text-green-600 text-xs font-bold">✓</span>
                 </div>
                 <span className="text-gray-700">{tip}</span>
@@ -173,17 +225,17 @@ export default function FAQPage() {
             ))}
           </div>
           
-          <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-yellow-800 text-sm">
-              <strong>Remember:</strong> When in doubt about food safety, it's always better to 
+          <div className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl">
+            <p className="text-amber-800 text-sm">
+              <strong>Remember:</strong> When in doubt about food safety, it&apos;s always better to 
               err on the side of caution. Trust your judgment and prioritize your health.
             </p>
           </div>
         </div>
 
         {/* FAQ Items */}
-        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Common Questions</h2>
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-xl border border-white/20 p-8">
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-6">Common Questions</h2>
           
           <div className="space-y-4">
             {faqs.map((faq, index) => (
@@ -199,22 +251,25 @@ export default function FAQPage() {
         </div>
 
         {/* Contact Section */}
-        <div className="bg-green-50 border border-green-200 rounded-lg p-8 mt-8 text-center">
+        <div className="bg-gradient-to-r from-green-50 via-emerald-50 to-teal-50 border border-green-200 rounded-xl p-8 mt-8 text-center">
+          <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <span className="text-white text-2xl">💬</span>
+          </div>
           <h3 className="text-xl font-bold text-gray-900 mb-4">
             Still have questions?
           </h3>
           <p className="text-gray-600 mb-4">
-            We're here to help! If you can't find the answer you're looking for, 
+            We&apos;re here to help! If you can&apos;t find the answer you&apos;re looking for, 
             feel free to reach out to our team.
           </p>
           <a 
             href="mailto:support@barsha.tn" 
-            className="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            className="inline-flex items-center bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg"
           >
             Contact Support
           </a>
         </div>
-      </div>
+      </main>
     </div>
   )
 }

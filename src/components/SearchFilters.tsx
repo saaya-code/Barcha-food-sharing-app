@@ -1,9 +1,11 @@
 'use client'
 
-import { Search, Filter, X } from 'lucide-react'
-import { FoodCategory } from '@/types'
+import { Search, X } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Card } from '@/components/ui/card'
 
-interface SearchFiltersProps {
+export type SearchFiltersProps = {
   searchQuery: string
   selectedCategory: string
   selectedLocation: string
@@ -58,29 +60,29 @@ export default function SearchFilters({
   const hasActiveFilters = searchQuery || selectedCategory || selectedLocation || selectedExpiry
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+    <Card className="p-6 bg-gradient-to-r from-white to-gray-50 border-0 shadow-lg">
       <div className="flex flex-col lg:flex-row gap-4">
         {/* Search Input */}
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
           <input
             type="text"
             placeholder="Search food items..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:shadow-md text-gray-800 placeholder-gray-500"
           />
         </div>
 
-        {/* Filters */}
+        {/* Filter Dropdowns */}
         <div className="flex flex-col sm:flex-row gap-3">
           <select
             value={selectedCategory}
             onChange={(e) => onCategoryChange(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
+            className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:shadow-md min-w-[160px] text-gray-800 font-medium"
           >
             {FOOD_CATEGORIES.map((category) => (
-              <option key={category.value} value={category.value}>
+              <option key={category.value} value={category.value} className="text-gray-800 font-medium">
                 {category.label}
               </option>
             ))}
@@ -89,10 +91,10 @@ export default function SearchFilters({
           <select
             value={selectedLocation}
             onChange={(e) => onLocationChange(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
+            className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:shadow-md min-w-[160px] text-gray-800 font-medium"
           >
             {LOCATIONS.map((location) => (
-              <option key={location.value} value={location.value}>
+              <option key={location.value} value={location.value} className="text-gray-800 font-medium">
                 {location.label}
               </option>
             ))}
@@ -101,151 +103,57 @@ export default function SearchFilters({
           <select
             value={selectedExpiry}
             onChange={(e) => onExpiryChange(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
+            className="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:shadow-md min-w-[160px] text-gray-800 font-medium"
           >
             {EXPIRY_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
+              <option key={option.value} value={option.value} className="text-gray-800 font-medium">
                 {option.label}
               </option>
             ))}
           </select>
 
           {hasActiveFilters && onClear && (
-            <button
+            <Button
               onClick={onClear}
-              className="px-3 py-2 text-gray-600 hover:text-red-600 border border-gray-300 rounded-lg hover:border-red-300 transition-colors flex items-center gap-2"
+              variant="outline"
+              className="px-4 py-3 text-gray-700 hover:text-red-600 border-gray-200 rounded-xl hover:border-red-300 transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md font-medium"
             >
               <X size={16} />
               Clear
-            </button>
+            </Button>
           )}
         </div>
       </div>
-    </div>
-  )
-}
-    onFilterChange(updated)
-    if (newFilters.query !== undefined) {
-      onSearch(newFilters.query)
-    }
-  }
 
-  const clearFilters = () => {
-    const clearedFilters: SearchFilters = {
-      query: '',
-      category: 'all',
-      location: '',
-      expiryHours: null
-    }
-    setFilters(clearedFilters)
-    onFilterChange(clearedFilters)
-    onSearch('')
-  }
-
-  const hasActiveFilters = filters.category !== 'all' || filters.location !== '' || filters.expiryHours !== null
-
-  return (
-    <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-      {/* Search Bar */}
-      <div className="flex gap-3 mb-4">
-        <div className="flex-1 relative">
-          <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search for food items..."
-            value={filters.query}
-            onChange={(e) => updateFilters({ query: e.target.value })}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-          />
-        </div>
-        
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors ${
-            hasActiveFilters || showFilters
-              ? 'bg-green-600 text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
-        >
-          <Filter size={18} />
-          <span>Filters</span>
-          {hasActiveFilters && (
-            <span className="bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              !
-            </span>
-          )}
-        </button>
-      </div>
-
-      {/* Filters Panel */}
-      {showFilters && (
-        <div className="border-t border-gray-200 pt-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Category Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Category
-              </label>
-              <select
-                value={filters.category}
-                onChange={(e) => updateFilters({ category: e.target.value as FoodCategory | 'all' })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              >
-                {FOOD_CATEGORIES.map((category) => (
-                  <option key={category.value} value={category.value}>
-                    {category.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Location Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Location
-              </label>
-              <input
-                type="text"
-                placeholder="City or area..."
-                value={filters.location}
-                onChange={(e) => updateFilters({ location: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
-            </div>
-
-            {/* Expiry Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Expires
-              </label>
-              <select
-                value={filters.expiryHours || ''}
-                onChange={(e) => updateFilters({ expiryHours: e.target.value ? Number(e.target.value) : null })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              >
-                {EXPIRY_OPTIONS.map((option) => (
-                  <option key={option.value || 'all'} value={option.value || ''}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+      {/* Active Filters Display */}
+      {hasActiveFilters && (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <div className="flex flex-wrap gap-2">
+            <span className="text-sm text-gray-800 mr-2 font-medium">Active filters:</span>
+            {searchQuery && (
+              <Badge variant="secondary" className="bg-green-100 text-green-800 font-medium">
+                Search: &quot;{searchQuery}&quot;
+              </Badge>
+            )}
+            {selectedCategory && (
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800 font-medium">
+                Category: {FOOD_CATEGORIES.find(c => c.value === selectedCategory)?.label}
+              </Badge>
+            )}
+            {selectedLocation && (
+              <Badge variant="secondary" className="bg-purple-100 text-purple-800 font-medium">
+                Location: {selectedLocation}
+              </Badge>
+            )}
+            {selectedExpiry && (
+              <Badge variant="secondary" className="bg-orange-100 text-orange-800 font-medium">
+                Expiry: {EXPIRY_OPTIONS.find(e => e.value === selectedExpiry)?.label}
+              </Badge>
+            )}
           </div>
-
-          {/* Clear Filters */}
-          {hasActiveFilters && (
-            <div className="mt-4 flex justify-end">
-              <button
-                onClick={clearFilters}
-                className="text-sm text-gray-500 hover:text-gray-700 flex items-center space-x-1"
-              >
-                <X size={14} />
-                <span>Clear all filters</span>
-              </button>
-            </div>
-          )}
         </div>
       )}
-    </div>
+    </Card>
   )
 }
+

@@ -1,6 +1,5 @@
-import { FoodItem, User } from '@/types'
 
-export const mockFoodItems: FoodItem[] = [
+export const mockFoodItems = [
   {
     id: '1',
     title: 'Fresh Baguettes',
@@ -48,7 +47,7 @@ export const mockFoodItems: FoodItem[] = [
   }
 ]
 
-export const mockUsers: User[] = [
+export const mockUsers = [
   {
     id: '1',
     email: 'ahmed@example.com',

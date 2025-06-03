@@ -1,124 +1,154 @@
 'use client'
 
-import Image from 'next/image'
-import { Clock, MapPin, User, MessageCircle } from 'lucide-react'
 import { FoodItem } from '@/types'
-import { formatExpiryTime, formatTimeAgo } from '@/lib/utils'
+import { formatExpiryTime } from '@/lib/utils'
+import { MapPin, Clock, User, Heart } from 'lucide-react'
+import { Card, CardContent, CardFooter } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { useState } from 'react'
+import Image from 'next/image'
 
 interface FoodCardProps {
   item: FoodItem
-  onRequest?: (itemId: string) => void
+  onRequest: (item: FoodItem) => void
 }
 
 export default function FoodCard({ item, onRequest }: FoodCardProps) {
-  const getExpiryColor = () => {
-    const now = new Date()
-    const diffInHours = Math.floor((item.expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60))
-    
-    if (diffInHours < 0) return 'text-red-600 bg-red-50'
-    if (diffInHours < 6) return 'text-orange-600 bg-orange-50'
-    if (diffInHours < 24) return 'text-yellow-600 bg-yellow-50'
-    return 'text-green-600 bg-green-50'
+  const [isLiked, setIsLiked] = useState(false)
+  const expiryStatus = formatExpiryTime(new Date(item.expiry_date))
+  
+  const getExpiryBadgeVariant = () => {
+    if (expiryStatus.includes('Expired')) return 'destructive'
+    if (expiryStatus.includes('soon')) return 'warning'
+    if (expiryStatus.includes('h left')) return 'warning'
+    return 'success'
   }
 
-  const getFoodTypeColor = () => {
-    const colors: Record<string, string> = {
-      'bread': 'bg-amber-100 text-amber-800',
-      'fruits': 'bg-orange-100 text-orange-800',
-      'vegetables': 'bg-green-100 text-green-800',
-      'cooked-meals': 'bg-red-100 text-red-800',
-      'dairy': 'bg-blue-100 text-blue-800',
-      'desserts': 'bg-pink-100 text-pink-800',
-      'beverages': 'bg-cyan-100 text-cyan-800',
-      'other': 'bg-gray-100 text-gray-800'
+  const getCategoryEmoji = (category: string) => {
+    const emojiMap: { [key: string]: string } = {
+      'bread': '🍞',
+      'fruits': '🍎',
+      'vegetables': '🥕',
+      'cooked-meals': '🍲',
+      'dairy': '🥛',
+      'desserts': '🍰',
+      'beverages': '🥤',
+      'other': '🍽️'
     }
-    return colors[item.foodType] || colors['other']
+    return emojiMap[category] || '🍽️'
   }
 
-  const isExpired = item.expiryDate.getTime() < Date.now()
+  const isExpired = new Date(item.expiry_date).getTime() < Date.now()
 
   return (
-    <div 
-      data-testid="food-card"
-      className={`bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-gray-200 ${isExpired ? 'opacity-60' : ''}`}
-    >
-      {/* Image */}
-      <div className="relative h-48 bg-gray-200">
-        {item.imageUrl ? (
+    <Card className="group hover:shadow-xl transition-all duration-300 overflow-hidden border-0 shadow-md bg-gradient-to-br from-white to-gray-50 hover:scale-105">
+      {/* Image Section */}
+      <div className="relative h-48 overflow-hidden">
+        {item.image_url ? (
           <Image
-            src={item.imageUrl}
+            src={item.image_url}
             alt={item.title}
             fill
             className="object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-400">
-            <span className="text-sm">No image</span>
+          <div className="h-full w-full bg-gradient-to-br from-green-100 via-emerald-100 to-teal-200 flex items-center justify-center">
+            <div className="text-6xl opacity-80 group-hover:scale-110 transition-transform duration-300">
+              {getCategoryEmoji(item.food_type)}
+            </div>
           </div>
         )}
         
-        {/* Food type badge */}
-        <div className="absolute top-3 left-3">
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getFoodTypeColor()}`}>
-            {item.foodType.replace('-', ' ')}
-          </span>
-        </div>
+        <button
+          onClick={(e) => {
+        e.stopPropagation()
+        setIsLiked(!isLiked)
+          }}
+          className={`absolute top-3 right-3 p-2 rounded-full transition-all duration-200 ${
+        isLiked 
+          ? 'bg-red-500 text-white shadow-lg scale-110' 
+          : 'bg-white/80 text-gray-600 hover:bg-white hover:scale-105'
+          }`}
+        >
+          <Heart size={16} fill={isLiked ? "white" : "none"} />
+        </button>
+        
+        {/* Category Badge */}
+        <Badge 
+          variant="secondary" 
+          className="absolute top-3 left-3 bg-white/90 text-gray-700 font-medium shadow-sm"
+        >
+          {item.food_type.charAt(0).toUpperCase() + item.food_type.slice(1).replace('-', ' ')}
+        </Badge>
 
-        {/* Expiry badge */}
-        <div className="absolute top-3 right-3">
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getExpiryColor()}`}>
-            {formatExpiryTime(item.expiryDate)}
-          </span>
-        </div>
+        {/* Availability indicator */}
+        {!item.is_available && (
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+        <Badge variant="destructive" className="text-white bg-red-600">
+          No longer available
+        </Badge>
+          </div>
+        )}
       </div>
-
-      {/* Content */}
-      <div className="p-4">
-        <h3 className="font-semibold text-lg text-gray-900 mb-2">{item.title}</h3>
-        
-        <p className="text-gray-600 text-sm mb-3 line-clamp-2">{item.description}</p>
-        
-        <div className="space-y-2 mb-4">
-          <div className="flex items-center text-sm text-gray-500">
-            <MapPin size={14} className="mr-2" />
-            <span>{item.location}</span>
-          </div>
-          
-          <div className="flex items-center text-sm text-gray-500">
-            <User size={14} className="mr-2" />
-            <span>{item.donorName}</span>
-          </div>
-          
-          <div className="flex items-center text-sm text-gray-500">
-            <Clock size={14} className="mr-2" />
-            <span>Posted {formatTimeAgo(item.createdAt)}</span>
-          </div>
+      <CardContent className="p-5">
+        {/* Title and Description */}
+        <div className="mb-4">
+          <h3 className="font-bold text-xl text-gray-900 mb-2 line-clamp-1 group-hover:text-green-700 transition-colors">
+            {item.title}
+          </h3>
+          <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed">
+            {item.description}
+          </p>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-sm text-gray-500">Quantity: </span>
-            <span className="text-sm font-medium text-gray-900">{item.quantity}</span>
+        {/* Details */}
+        <div className="space-y-3">
+          <div className="flex items-center text-sm text-gray-600">
+            <MapPin size={16} className="mr-2 text-green-600" />
+            <span className="truncate font-medium">{item.location}</span>
           </div>
           
-          {item.isAvailable && onRequest && (
-            <button
-              onClick={() => onRequest(item.id)}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm flex items-center space-x-2 transition-colors"
-            >
-              <MessageCircle size={14} />
-              <span>Request</span>
-            </button>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center text-sm">
+              <Clock size={16} className="mr-2 text-blue-600" />
+              <Badge variant={getExpiryBadgeVariant()} className="text-xs font-medium">
+                {expiryStatus}
+              </Badge>
+            </div>
+            
+            <div className="text-sm font-semibold text-gray-800 bg-gray-100 px-3 py-1 rounded-full">
+              {item.quantity}
+            </div>
+          </div>
+
+          {item.pickup_instructions && (
+            <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <p className="text-xs text-amber-800">
+                <span className="font-semibold">Pickup: </span>
+                {item.pickup_instructions}
+              </p>
+            </div>
           )}
         </div>
+      </CardContent>
 
-        {item.pickupInstructions && (
-          <div className="mt-3 p-2 bg-gray-50 rounded text-xs text-gray-600">
-            <span className="font-medium">Pickup: </span>
-            {item.pickupInstructions}
-          </div>
-        )}
-      </div>
-    </div>
+      <CardFooter className="p-5 pt-0 flex items-center justify-between">
+        <div className="flex items-center text-sm text-gray-600">
+          <User size={16} className="mr-2 text-purple-600" />
+          <span className="truncate max-w-[120px] font-medium">{item.donor_name}</span>
+        </div>
+        
+        <Button 
+          onClick={() => onRequest(item)}
+          size="sm"
+          disabled={!item.is_available || isExpired}
+          className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50"
+        >
+          {!item.is_available ? 'Unavailable' : isExpired ? 'Expired' : 'Request'}
+        </Button>
+      </CardFooter>
+    </Card>
   )
 }
+

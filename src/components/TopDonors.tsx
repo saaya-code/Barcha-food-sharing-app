@@ -29,21 +29,23 @@ export default function TopDonors({ users, limit = 5 }: TopDonorsProps) {
   const getBadgeColor = (position: number) => {
     switch (position) {
       case 0:
-        return 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-white'
+        return 'bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-lg'
       case 1:
-        return 'bg-gradient-to-r from-gray-300 to-gray-500 text-white'
+        return 'bg-gradient-to-r from-gray-300 to-gray-400 text-white shadow-md'
       case 2:
-        return 'bg-gradient-to-r from-amber-400 to-amber-600 text-white'
+        return 'bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-md'
       default:
-        return 'bg-gray-100 text-gray-700'
+        return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 shadow-sm'
     }
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-      <div className="flex items-center space-x-2 mb-4">
-        <Trophy className="text-green-600" size={24} />
-        <h2 className="text-xl font-bold text-gray-900">Top Donors This Week</h2>
+    <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-xl border border-white/20 p-6">
+      <div className="flex items-center space-x-3 mb-6">
+        <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-amber-600 rounded-lg flex items-center justify-center shadow-lg">
+          <Trophy className="text-white" size={20} />
+        </div>
+        <h2 className="text-xl font-bold bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent">Top Donors This Week</h2>
       </div>
       
       <div className="space-y-3">

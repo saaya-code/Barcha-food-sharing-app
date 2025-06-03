@@ -1,10 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
-import { Upload, Calendar, MapPin, User, Phone, MessageSquare } from 'lucide-react'
+import ImageUpload from '@/components/ImageUpload'
+import { Calendar, MapPin, User, Phone, MessageSquare } from 'lucide-react'
 import { FoodCategory } from '@/types'
+import { useAuth } from '@/contexts/AuthContext'
+import { createFoodItem } from '@/lib/supabase'
 
 const FOOD_CATEGORIES: { value: FoodCategory; label: string }[] = [
   { value: 'bread', label: 'Bread & Bakery' },
@@ -19,7 +22,10 @@ const FOOD_CATEGORIES: { value: FoodCategory; label: string }[] = [
 
 export default function AddItemPage() {
   const router = useRouter()
+  const { user } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const [imageUrl, setImageUrl] = useState('')
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -34,27 +40,81 @@ export default function AddItemPage() {
     contactMethod: 'phone' as 'phone' | 'whatsapp' | 'email'
   })
 
+  // Redirect if user is not logged in
+  useEffect(() => {
+    if (!user) {
+      router.push('/login')
+    }
+  }, [user, router])
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+    if (error) setError('')
+  }
+
+  const handleImageUploaded = (url: string) => {
+    setImageUrl(url)
+  }
+
+  const handleImageRemoved = () => {
+    setImageUrl('')
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setError('')
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      if (!user) {
+        setError('You must be logged in to add items')
+        return
+      }
+
+      // Validate required fields
+      if (!formData.title || !formData.description || !formData.quantity || 
+          !formData.location || !formData.expiryDate || !formData.expiryTime) {
+        setError('Please fill in all required fields')
+        return
+      }
+
+      // Combine date and time for expiry
+      const expiryDateTime = new Date(`${formData.expiryDate}T${formData.expiryTime}`)
       
-      // In a real app, this would send data to your backend
-      console.log('Submitting food item:', formData)
-      
-      // Show success message and redirect
-      alert('Food item posted successfully! Thank you for helping reduce waste.')
-      router.push('/')
+      // Check if expiry date is in the future
+      if (expiryDateTime <= new Date()) {
+        setError('Expiry date must be in the future')
+        return
+      }
+
+      // Create food item
+      const { error: createError } = await createFoodItem({
+        title: formData.title,
+        description: formData.description,
+        food_type: formData.foodType,
+        quantity: formData.quantity,
+        location: formData.location,
+        expiry_date: expiryDateTime.toISOString(),
+        pickup_instructions: formData.pickupInstructions,
+        image_url: imageUrl,
+        donor_id: user.id,
+        donor_name: formData.donorName,
+        donor_contact: formData.donorContact,
+        contact_method: formData.contactMethod,
+        is_available: true
+      })
+
+      if (createError) {
+        setError(createError.message)
+        return
+      }
+
+      // Success
+      alert('Food item added successfully!')
+      router.push('/browse')
     } catch (error) {
       console.error('Error submitting food item:', error)
-      alert('Error posting food item. Please try again.')
+      setError('Error posting food item. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
@@ -67,15 +127,18 @@ export default function AddItemPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50">
       <Header />
       
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Share Surplus Food</h1>
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-xl border border-white/20 p-8">
+          <div className="mb-8 text-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <span className="text-white text-2xl">🍽️</span>
+            </div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">Add Food Item</h1>
             <p className="text-gray-600">
-              Help reduce food waste by sharing your surplus food with the community.
+              Share your surplus food with the community and help reduce waste.
             </p>
           </div>
 
@@ -85,13 +148,11 @@ export default function AddItemPage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Photo (Optional)
               </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-400 transition-colors">
-                <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                <p className="mt-2 text-sm text-gray-600">
-                  Click to upload or drag and drop
-                </p>
-                <p className="text-xs text-gray-500">PNG, JPG up to 10MB</p>
-              </div>
+              <ImageUpload
+                onImageUploaded={handleImageUploaded}
+                onImageRemoved={handleImageRemoved}
+                currentImage={imageUrl}
+              />
             </div>
 
             {/* Food Details */}
@@ -106,19 +167,19 @@ export default function AddItemPage() {
                   placeholder="e.g., Fresh bread, Homemade pasta"
                   value={formData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Food Category *
+                  Food Type *
                 </label>
                 <select
                   required
                   value={formData.foodType}
                   onChange={(e) => handleInputChange('foodType', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70"
                 >
                   {FOOD_CATEGORIES.map((category) => (
                     <option key={category.value} value={category.value}>
@@ -139,7 +200,7 @@ export default function AddItemPage() {
                 placeholder="Describe the food, its condition, and any relevant details..."
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70 resize-none"
               />
             </div>
 
@@ -154,7 +215,7 @@ export default function AddItemPage() {
                   placeholder="e.g., 2 loaves, 1 kg, 4 servings"
                   value={formData.quantity}
                   onChange={(e) => handleInputChange('quantity', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70"
                 />
               </div>
 
@@ -169,7 +230,7 @@ export default function AddItemPage() {
                   placeholder="e.g., Tunis Centre, Sfax"
                   value={formData.location}
                   onChange={(e) => handleInputChange('location', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70"
                 />
               </div>
             </div>
@@ -179,7 +240,7 @@ export default function AddItemPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <Calendar size={16} className="inline mr-1" />
-                  Best before date *
+                  Expiry Date *
                 </label>
                 <input
                   type="date"
@@ -188,7 +249,7 @@ export default function AddItemPage() {
                   max={getTomorrowDate()}
                   value={formData.expiryDate}
                   onChange={(e) => handleInputChange('expiryDate', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70"
                 />
               </div>
 
@@ -200,20 +261,25 @@ export default function AddItemPage() {
                   type="time"
                   value={formData.expiryTime}
                   onChange={(e) => handleInputChange('expiryTime', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70"
                 />
               </div>
             </div>
 
             {/* Contact Information */}
-            <div className="border-t border-gray-200 pt-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Contact Information</h3>
+            <div className="border-t border-gray-200 pt-8">
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <User size={16} className="text-white" />
+                </div>
+                <h3 className="text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Contact Information</h3>
+              </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     <User size={16} className="inline mr-1" />
-                    Your Name *
+                    Donor Name *
                   </label>
                   <input
                     type="text"
@@ -221,7 +287,7 @@ export default function AddItemPage() {
                     placeholder="Your full name"
                     value={formData.donorName}
                     onChange={(e) => handleInputChange('donorName', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70"
                   />
                 </div>
 
@@ -233,7 +299,7 @@ export default function AddItemPage() {
                     required
                     value={formData.contactMethod}
                     onChange={(e) => handleInputChange('contactMethod', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70"
                   >
                     <option value="phone">Phone</option>
                     <option value="whatsapp">WhatsApp</option>
@@ -245,7 +311,7 @@ export default function AddItemPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <Phone size={16} className="inline mr-1" />
-                  Contact Details *
+                  Contact *
                 </label>
                 <input
                   type="text"
@@ -257,7 +323,7 @@ export default function AddItemPage() {
                   }
                   value={formData.donorContact}
                   onChange={(e) => handleInputChange('donorContact', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70"
                 />
               </div>
             </div>
@@ -273,22 +339,32 @@ export default function AddItemPage() {
                 placeholder="e.g., Ring the side door bell, Available after 6 PM, Located near the market..."
                 value={formData.pickupInstructions}
                 onChange={(e) => handleInputChange('pickupInstructions', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70 resize-none"
               />
             </div>
 
             {/* Submit Button */}
-            <div className="pt-6">
+            <div className="pt-8">
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white ${
+                className={`w-full flex justify-center py-4 px-6 border border-transparent rounded-xl shadow-lg text-sm font-semibold text-white transform transition-all duration-200 ${
                   isSubmitting
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-offset-2 focus:ring-green-500'
-                } transition-colors`}
+                    ? 'bg-gray-400 cursor-not-allowed scale-95'
+                    : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 hover:scale-105 focus:ring-4 focus:ring-green-200'
+                }`}
               >
-                {isSubmitting ? 'Posting...' : 'Post Food Item'}
+                {isSubmitting ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Posting...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <span>Post Food Item</span>
+                    <span>🌟</span>
+                  </div>
+                )}
               </button>
             </div>
           </form>

@@ -1,16 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Header from '@/components/Header'
 import { Mail, Lock, User, Phone, Eye, EyeOff } from 'lucide-react'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function SignupPage() {
   const router = useRouter()
+  const { signUp, user } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -20,34 +23,57 @@ export default function SignupPage() {
     agreeToTerms: false
   })
 
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (user) {
+      router.push('/')
+    }
+  }, [user, router])
+
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+    if (error) setError('')
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setError('')
 
     try {
       // Basic validation
       if (formData.password !== formData.confirmPassword) {
-        alert('Passwords do not match')
+        setError('Passwords do not match')
+        return
+      }
+
+      if (formData.password.length < 6) {
+        setError('Password must be at least 6 characters long')
         return
       }
 
       if (!formData.agreeToTerms) {
-        alert('Please agree to the terms and conditions')
+        setError('Please agree to the terms and conditions')
         return
       }
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // In a real app, this would create account with Supabase or your auth provider
-      console.log('Signup attempt:', formData)
-      
-      // Simulate successful signup
-      alert('Account created successfully! Welcome to Barsha.')
+      // Sign up with Supabase
+      const { error: signUpError } = await signUp(
+        formData.email,
+        formData.password,
+        {
+          name: formData.name,
+          whatsapp_number: formData.whatsappNumber
+        }
+      )
+
+      if (signUpError) {
+        setError(signUpError.message)
+        return
+      }
+
+      // Success - user will be redirected by useEffect when user state updates
+      alert('Account created successfully! Welcome to Barcha.')
       router.push('/')
     } catch (error) {
       console.error('Signup error:', error)
@@ -71,6 +97,12 @@ export default function SignupPage() {
               <h2 className="text-2xl font-bold text-gray-900">Join Barsha</h2>
               <p className="text-gray-600 mt-2">Create your account and start sharing food</p>
             </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-4">
+                {error}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>

@@ -2,25 +2,29 @@ export interface FoodItem {
   id: string
   title: string
   description: string
-  foodType: string
+  food_type: string
   quantity: string
-  imageUrl?: string
+  image_url?: string | null
   location: string
-  expiryDate: Date
-  pickupInstructions?: string
-  donorName: string
-  donorContact: string
-  createdAt: Date
-  isAvailable: boolean
+  expiry_date: string
+  pickup_instructions?: string | null
+  donor_id: string
+  donor_name: string
+  donor_contact: string
+  contact_method?: string
+  created_at: string
+  updated_at?: string
+  is_available: boolean
 }
 
 export interface User {
   id: string
   email: string
   name: string
-  whatsappNumber?: string
-  totalDonations: number
-  createdAt: Date
+  whatsapp_number?: string | null
+  total_donations: number
+  created_at: string
+  updated_at?: string
 }
 
 export interface FoodRequest {
