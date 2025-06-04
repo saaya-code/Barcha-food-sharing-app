@@ -343,11 +343,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact & Support
 
-- **Email**: info@barcha-app.com
-- **Twitter**: [@BarchaApp](https://twitter.com/BarchaApp)
-- **Website**: [www.barcha-app.com](https://www.barcha-app.com) (coming soon)
-
----
+- **Email**: boualimohamed74@gmail.com
+- **GitHub**: [saaya-code](https://github.com/saaya-code)
 
 <div align="center">
 
@@ -355,6 +352,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 *Together, we can reduce food waste and build stronger communities.*
 
-[⭐ Star this repo](https://github.com/yourusername/barcha) | [🐛 Report Bug](https://github.com/yourusername/barcha/issues) | [💡 Request Feature](https://github.com/yourusername/barcha/issues)
+[⭐ Star this repo](https://github.com/saaya-code/Barcha-food-sharing-app) | [🐛 Report Bug](https://github.com/saaya-code/Barcha-food-sharing-app/issues) | [💡 Request Feature](https://github.com/saaya-code/Barcha-food-sharing-app/issues)
 
 </div>
