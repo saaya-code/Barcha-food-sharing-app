@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function Header() {
-  const { user, signOut, loading } = useAuth()
+  const { user, signOut } = useAuth()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
 
@@ -32,7 +32,7 @@ export default function Header() {
               <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full blur-lg opacity-0 group-hover:opacity-30 transition-opacity duration-300" />
             </div>
             <span className="text-2xl font-bold bg-gradient-to-r from-green-600 via-emerald-600 to-blue-600 bg-clip-text text-transparent drop-shadow-sm">
-              Barcha
+              Barcha!
             </span>
           </Link>
 
@@ -110,7 +110,7 @@ export default function Header() {
               </>
             ) : (
               <div className="flex items-center space-x-3">
-                <Button variant="ghost" asChild className="hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 hover:text-green-600 rounded-xl px-6 py-3 font-semibold transition-all duration-300">
+                <Button variant="secondary" asChild className="hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 hover:text-green-600 rounded-xl px-6 py-3 font-semibold transition-all duration-300">
                   <Link href="/login">Sign In</Link>
                 </Button>
                 <Button asChild className="bg-gradient-to-r from-green-600 via-emerald-600 to-blue-600 hover:from-green-700 hover:via-emerald-700 hover:to-blue-700 rounded-xl px-6 py-3 font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">

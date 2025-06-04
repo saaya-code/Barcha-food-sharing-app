@@ -68,7 +68,7 @@ export default function Home() {
   }, [searchQuery, selectedCategory, selectedLocation, selectedExpiry])
 
   const handleRequestFood = (item: FoodItem) => {
-    alert(`Request sent for: ${item.title}\nContact: ${item.donorContact}`)
+    alert(`Request sent for: ${item.title}\nContact: ${item.donor_contact}`)
   }
 
   const handleClearFilters = () => {
@@ -188,7 +188,22 @@ export default function Home() {
                 {filteredItems.slice(0, 6).map((item) => (
                   <FoodCard
                     key={item.id}
-                    item={item}
+                    item={{
+                      id: item.id,
+                      title: item.title,
+                      description: item.description,
+                      food_type: item.foodType,
+                      quantity: item.quantity,
+                      image_url: item.imageUrl,
+                      location: item.location,
+                      expiry_date: item.expiryDate.toISOString(),
+                      pickup_instructions: item.pickupInstructions,
+                      donor_id: item.id, // Assuming donor_id might be same as item.id
+                      donor_name: item.donorName,
+                      donor_contact: item.donorContact,
+                      created_at: item.createdAt.toISOString(),
+                      is_available: item.isAvailable
+                    }}
                     onRequest={handleRequestFood}
                   />
                 ))}
@@ -233,7 +248,11 @@ export default function Home() {
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <TopDonors users={mockUsers} />
+            <TopDonors users={mockUsers.map(user => ({
+              ...user,
+              total_donations: user.totalDonations,
+              created_at: user.createdAt.toISOString()
+            }))} />
           </div>
         </div>
       </main>

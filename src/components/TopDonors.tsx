@@ -10,7 +10,7 @@ interface TopDonorsProps {
 
 export default function TopDonors({ users, limit = 5 }: TopDonorsProps) {
   const topUsers = users
-    .sort((a, b) => b.totalDonations - a.totalDonations)
+    .sort((a, b) => b.total_donations - a.total_donations)
     .slice(0, limit)
 
   const getIcon = (position: number) => {
@@ -64,7 +64,7 @@ export default function TopDonors({ users, limit = 5 }: TopDonorsProps) {
               <div>
                 <h3 className="font-medium text-gray-900">{user.name}</h3>
                 <p className="text-sm text-gray-500">
-                  {user.totalDonations} donation{user.totalDonations !== 1 ? 's' : ''}
+                  {user.total_donations} donation{user.total_donations !== 1 ? 's' : ''}
                 </p>
               </div>
             </div>

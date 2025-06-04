@@ -3,13 +3,14 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session, AuthChangeEvent } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
+import { hasValidSupabaseConfig } from '@/lib/dev-config'
 
 interface AuthContextType {
   user: User | null
   session: Session | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: unknown }>
-  signUp: (email: string, password: string, userData: { name: string; whatsapp_number?: string }) => Promise<{ error: any }>
+  signUp: (email: string, password: string, userData: { name: string; whatsapp_number?: string }) => Promise<{ error: unknown }>
   signOut: () => Promise<void>
 }
 
@@ -36,31 +37,51 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // If Supabase is not properly configured
+    if (!hasValidSupabaseConfig()) {
+      console.warn('Supabase is not configured. Skipping auth initialization.')
+      setLoading(false)
+      return
+    }
     // Get initial session
     const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      setSession(session)
-      setUser(session?.user ?? null)
-      setLoading(false)
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        if (error) {
+          console.error('Auth session error:', error)
+        }
+        setSession(session)
+        setUser(session?.user ?? null)
+      } catch (error) {
+        console.error('Auth initialization error:', error)
+        // Continue without auth if Supabase is not configured
+      } finally {
+        setLoading(false)
+      }
     }
 
     getSession()
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session)
-        setUser(session?.user ?? null)
-        setLoading(false)
+    try {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          setSession(session)
+          setUser(session?.user ?? null)
+          setLoading(false)
 
-        // Create user profile if signing up
-        if (event === 'SIGNED_UP' as AuthChangeEvent && session?.user) {
-          await createUserProfile(session.user)
+          // Create user profile if signing up
+          if (event === 'SIGNED_UP' as AuthChangeEvent && session?.user) {
+            await createUserProfile(session.user)
+          }
         }
-      }
-    )
+      )
 
-    return () => subscription.unsubscribe()
+      return () => subscription.unsubscribe()
+    } catch (error) {
+      console.error('Auth subscription error:', error)
+      return () => {} // Return empty cleanup function
+    }
   }, [])
 
   const createUserProfile = async (user: User) => {

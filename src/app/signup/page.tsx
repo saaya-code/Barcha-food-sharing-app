@@ -68,12 +68,13 @@ export default function SignupPage() {
       )
 
       if (signUpError) {
-        setError(signUpError.message)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setError((signUpError as any).message)
         return
       }
 
       // Success - user will be redirected by useEffect when user state updates
-      alert('Account created successfully! Welcome to Barcha.')
+      alert('Account created successfully! Welcome to Barcha!.')
       router.push('/')
     } catch (error) {
       console.error('Signup error:', error)
@@ -117,7 +118,7 @@ export default function SignupPage() {
                     placeholder="Your full name"
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white shadow-sm text-gray-900 placeholder-gray-500"
                   />
                 </div>
               </div>
@@ -134,7 +135,7 @@ export default function SignupPage() {
                     placeholder="your.email@example.com"
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white shadow-sm text-gray-900 placeholder-gray-500"
                   />
                 </div>
               </div>
@@ -150,7 +151,7 @@ export default function SignupPage() {
                     placeholder="+216 XX XXX XXX"
                     value={formData.whatsappNumber}
                     onChange={(e) => handleInputChange('whatsappNumber', e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white shadow-sm text-gray-900 placeholder-gray-500"
                   />
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
@@ -170,7 +171,7 @@ export default function SignupPage() {
                     placeholder="Create a password"
                     value={formData.password}
                     onChange={(e) => handleInputChange('password', e.target.value)}
-                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white shadow-sm text-gray-900 placeholder-gray-500"
                   />
                   <button
                     type="button"
@@ -194,7 +195,7 @@ export default function SignupPage() {
                     placeholder="Confirm your password"
                     value={formData.confirmPassword}
                     onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white shadow-sm text-gray-900 placeholder-gray-500"
                   />
                   <button
                     type="button"

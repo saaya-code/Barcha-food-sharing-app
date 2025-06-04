@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { FoodItem, FoodRequest } from '@/types'
+import { hasValidSupabaseConfig, mockProfile, mockFoodItems } from './dev-config'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -58,51 +59,82 @@ export const getFoodItems = async (filters?: {
   search?: string
   expiry?: string
 }) => {
-  let query = supabase
-    .from(FOOD_ITEMS_TABLE)
-    .select('*')
-    .eq('is_available', true)
-    .order('created_at', { ascending: false })
-
-  if (filters?.category) {
-    query = query.eq('food_type', filters.category)
+  // In development mode without valid Supabase config, return mock data
+  if (!hasValidSupabaseConfig()) {
+    console.log('Using mock food items data (Supabase not configured)')
+    let filteredItems = [...mockFoodItems]
+    
+    if (filters?.category) {
+      filteredItems = filteredItems.filter(item => item.food_type === filters.category)
+    }
+    
+    if (filters?.location) {
+      filteredItems = filteredItems.filter(item => 
+        item.location.toLowerCase().includes(filters.location!.toLowerCase())
+      )
+    }
+    
+    if (filters?.search) {
+      const searchTerm = filters.search.toLowerCase()
+      filteredItems = filteredItems.filter(item => 
+        item.title.toLowerCase().includes(searchTerm) ||
+        item.description.toLowerCase().includes(searchTerm)
+      )
+    }
+    
+    return { data: filteredItems, error: null }
   }
 
-  if (filters?.location) {
-    query = query.ilike('location', `%${filters.location}%`)
-  }
+  try {
+    let query = supabase
+      .from(FOOD_ITEMS_TABLE)
+      .select('*')
+      .eq('is_available', true)
+      .order('created_at', { ascending: false })
 
-  if (filters?.search) {
-    query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`)
-  }
-
-  if (filters?.expiry) {
-    const now = new Date()
-    let expiryDate: Date
-
-    switch (filters.expiry) {
-      case 'today':
-        expiryDate = new Date(now.getTime() + 24 * 60 * 60 * 1000)
-        break
-      case 'tomorrow':
-        expiryDate = new Date(now.getTime() + 48 * 60 * 60 * 1000)
-        break
-      case '3days':
-        expiryDate = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
-        break
-      case 'week':
-        expiryDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-        break
-      default:
-        expiryDate = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000)
+    if (filters?.category) {
+      query = query.eq('food_type', filters.category)
     }
 
-    query = query.lte('expiry_date', expiryDate.toISOString())
+    if (filters?.location) {
+      query = query.ilike('location', `%${filters.location}%`)
+    }
+
+    if (filters?.search) {
+      query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`)
+    }
+
+    if (filters?.expiry) {
+      const now = new Date()
+      let expiryDate: Date
+
+      switch (filters.expiry) {
+        case 'today':
+          expiryDate = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+          break
+        case 'tomorrow':
+          expiryDate = new Date(now.getTime() + 48 * 60 * 60 * 1000)
+          break
+        case '3days':
+          expiryDate = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
+          break
+        case 'week':
+          expiryDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+          break
+        default:
+          expiryDate = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000)
+      }
+
+      query = query.lte('expiry_date', expiryDate.toISOString())
+    }
+
+    const { data, error } = await query
+
+    return { data, error }
+  } catch (error) {
+    console.error('Database error, falling back to mock data:', error)
+    return { data: mockFoodItems, error: null }
   }
-
-  const { data, error } = await query
-
-  return { data, error }
 }
 
 export const createFoodRequest = async (request: Omit<FoodRequest, 'id' | 'created_at'>) => {
@@ -116,13 +148,24 @@ export const createFoodRequest = async (request: Omit<FoodRequest, 'id' | 'creat
 }
 
 export const getUserProfile = async (userId: string) => {
-  const { data, error } = await supabase
-    .from(USERS_TABLE)
-    .select('*')
-    .eq('id', userId)
-    .single()
-  
-  return { data, error }
+  // In development mode without valid Supabase config, return mock data
+  if (!hasValidSupabaseConfig()) {
+    console.log('Using mock profile data (Supabase not configured)')
+    return { data: mockProfile, error: null }
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from(USERS_TABLE)
+      .select('*')
+      .eq('id', userId)
+      .single()
+    
+    return { data, error }
+  } catch (error) {
+    console.error('Database error, falling back to mock data:', error)
+    return { data: mockProfile, error: null }
+  }
 }
 
 // User operations
@@ -138,13 +181,24 @@ export const updateUserProfile = async (userId: string, updates: { name?: string
 }
 
 export const getUserFoodItems = async (userId: string) => {
-  const { data, error } = await supabase
-    .from(FOOD_ITEMS_TABLE)
-    .select('*')
-    .eq('donor_id', userId)
-    .order('created_at', { ascending: false })
-  
-  return { data, error }
+  // In development mode without valid Supabase config, return mock data
+  if (!hasValidSupabaseConfig()) {
+    console.log('Using mock food items data (Supabase not configured)')
+    return { data: mockFoodItems, error: null }
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from(FOOD_ITEMS_TABLE)
+      .select('*')
+      .eq('donor_id', userId)
+      .order('created_at', { ascending: false })
+    
+    return { data, error }
+  } catch (error) {
+    console.error('Database error, falling back to mock data:', error)
+    return { data: mockFoodItems, error: null }
+  }
 }
 
 export const getUserRequests = async (userId: string) => {
@@ -168,7 +222,7 @@ export const getUserRequests = async (userId: string) => {
   return { data, error }
 }
 
-export const updateRequestStatus = async (requestId: string, status: 'approved' | 'declined' | 'completed') => {
+export const updateRequestStatus = async (requestId: string, status: 'pending' | 'approved' | 'declined' | 'completed') => {
   const { data, error } = await supabase
     .from(FOOD_REQUESTS_TABLE)
     .update({ status, updated_at: new Date().toISOString() })

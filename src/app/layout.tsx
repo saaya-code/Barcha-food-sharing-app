@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Barcha - Food Surplus Exchange Platform",
+  title: "Barcha! - Food Surplus Exchange Platform",
   description: "A crowdsourced platform for sharing surplus food in Tunisia. Reduce waste, help your community.",
 };
 

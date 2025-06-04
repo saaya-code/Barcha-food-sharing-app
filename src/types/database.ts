@@ -113,7 +113,7 @@ export interface Database {
           requester_name?: string
           requester_contact?: string
           message?: string | null
-          status?: 'pending' | 'accepted' | 'declined'
+          status?: 'pending' | 'approved' | 'declined' | 'completed'
           created_at?: string
           updated_at?: string
         }

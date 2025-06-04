@@ -6,7 +6,6 @@ import Link from 'next/link'
 import Header from '@/components/Header'
 import { useAuth } from '@/contexts/AuthContext'
 import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -40,7 +39,8 @@ export default function LoginPage() {
       const { error } = await signIn(formData.email, formData.password)
       
       if (error) {
-        setError(error.message || 'Login failed. Please check your credentials.')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setError((error as any).message || 'Login failed. Please check your credentials.')
       } else {
         router.push('/')
       }
@@ -100,7 +100,7 @@ export default function LoginPage() {
                     placeholder="your.email@example.com"
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white/50 backdrop-blur-sm transition-all duration-200 hover:bg-white/70"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:shadow-md text-gray-900 placeholder-gray-500"
                   />
                 </div>
               </div>
@@ -117,7 +117,7 @@ export default function LoginPage() {
                     placeholder="Enter your password"
                     value={formData.password}
                     onChange={(e) => handleInputChange('password', e.target.value)}
-                    className="w-full pl-10 pr-12 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white/50 backdrop-blur-sm transition-all duration-200 hover:bg-white/70"
+                    className="w-full pl-10 pr-12 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:shadow-md text-gray-900 placeholder-gray-500"
                   />
                   <button
                     type="button"
@@ -149,14 +149,14 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <Button
+              <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full py-3 px-4 rounded-xl shadow-lg text-sm font-semibold transition-all duration-200 ${
+                className={`w-full py-3 px-4 rounded-xl shadow-lg text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
                   isLoading
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-green-600 via-emerald-600 to-blue-600 hover:from-green-700 hover:via-emerald-700 hover:to-blue-700 hover:shadow-xl hover:scale-105'
-                } text-white`}
+                    ? 'bg-gray-400 cursor-not-allowed text-white'
+                    : 'bg-gradient-to-r from-emerald-600 via-green-500 to-blue-600 hover:from-emerald-700 hover:via-green-600 hover:to-blue-700 text-white hover:shadow-xl hover:scale-105'
+                }`}
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center space-x-2">
@@ -166,7 +166,7 @@ export default function LoginPage() {
                 ) : (
                   'Sign In'
                 )}
-              </Button>
+              </button>
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">

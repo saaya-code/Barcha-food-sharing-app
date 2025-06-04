@@ -11,7 +11,7 @@ import FoodCard from '@/components/FoodCard'
 
 export default function ProfilePage() {
   const router = useRouter()
-  const { user, signOut } = useAuth()
+  const { user, signOut, loading: authLoading } = useAuth()
   const [isLoading, setIsLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -28,43 +28,83 @@ export default function ProfilePage() {
     whatsapp_number: ''
   })
 
-  const loadUserData = async () => {
-    try {
-      setIsLoading(true)
-      
-      // Load user profile
-      const { data: profileData, error: profileError } = await getUserProfile(user!.id)
-      if (profileError) throw profileError
-      
-      if (profileData) {
-        setProfile(profileData)
-        setEditForm({
-          name: profileData.name,
-          whatsapp_number: profileData.whatsapp_number || ''
-        })
-      }
-
-      // Load user's food items
-      const { data: itemsData, error: itemsError } = await getUserFoodItems(user!.id)
-      if (itemsError) throw itemsError
-      
-      setUserItems(itemsData || [])
-    } catch (error) {
-      console.error('Error loading user data:', error)
-      setError('Failed to load profile data')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   useEffect(() => {
+    // Wait for auth to finish loading
+    if (authLoading) return
+
+    // Redirect if not authenticated
     if (!user) {
       router.push('/login')
       return
     }
+
+    // Load user data
+    const loadUserData = async () => {
+      try {
+        setIsLoading(true)
+        setError('')
+        
+        // Load user profile
+        const { data: profileData, error: profileError } = await getUserProfile(user.id)
+        if (profileError) {
+          console.error('Profile error:', profileError)
+          throw new Error(`Failed to load profile: ${profileError.message}`)
+        }
+        
+        if (profileData) {
+          setProfile(profileData)
+          setEditForm({
+            name: profileData.name,
+            whatsapp_number: profileData.whatsapp_number || ''
+          })
+        } else {
+          // If no profile data exists, create a default profile
+          setProfile({
+            name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+            email: user.email || '',
+            whatsapp_number: '',
+            total_donations: 0
+          })
+          setEditForm({
+            name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+            whatsapp_number: ''
+          })
+        }
+
+        // Load user's food items
+        const { data: itemsData, error: itemsError } = await getUserFoodItems(user.id)
+        if (itemsError) {
+          console.error('Items error:', itemsError)
+          // Don't throw error for items, just log it
+          console.warn('Failed to load user items:', itemsError.message)
+        }
+        
+        setUserItems(itemsData || [])
+      } catch (error) {
+        console.error('Error loading user data:', error)
+        const errorMessage = error instanceof Error ? error.message : 'Failed to load profile data'
+        setError(errorMessage)
+        
+        // Set fallback profile data from user metadata
+        if (user) {
+          setProfile({
+            name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+            email: user.email || '',
+            whatsapp_number: '',
+            total_donations: 0
+          })
+          setEditForm({
+            name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+            whatsapp_number: ''
+          })
+        }
+      } finally {
+        setIsLoading(false)
+      }
+    }
     
     loadUserData()
-  }, [user, router, loadUserData])
+  }, [user, router, authLoading])
 
   const handleSaveProfile = async () => {
     try {
@@ -100,7 +140,7 @@ export default function ProfilePage() {
     router.push(`/browse`)
   }
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
@@ -116,6 +156,32 @@ export default function ProfilePage() {
       <Header />
       
       <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Error Display */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-red-800">{error}</p>
+              </div>
+              <div className="ml-auto pl-3">
+                <button
+                  onClick={() => setError('')}
+                  className="inline-flex text-red-400 hover:text-red-600"
+                >
+                  <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        
         {/* Profile Header */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex items-start justify-between mb-6">
@@ -208,14 +274,14 @@ export default function ProfilePage() {
                 <Mail size={20} className="text-gray-400" />
                 <div>
                   <p className="text-sm text-gray-500">Email</p>
-                  <p className="font-medium">{profile.email}</p>
+                  <p className="font-medium text-black">{profile.email}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone size={20} className="text-gray-400" />
                 <div>
                   <p className="text-sm text-gray-500">WhatsApp</p>
-                  <p className="font-medium">
+                  <p className="font-medium text-black">
                     {profile.whatsapp_number || 'Not provided'}
                   </p>
                 </div>
