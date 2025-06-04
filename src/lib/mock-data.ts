@@ -6,7 +6,7 @@ export const mockFoodItems = [
     description: 'Day-old baguettes from our bakery, still fresh and perfect for sharing',
     foodType: 'bread',
     quantity: '5 pieces',
-    imageUrl: '/api/placeholder/400/300',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/20/01_Baguettes_de_pain.jpg',
     location: 'Tunis Centre',
     expiryDate: new Date(Date.now() + 12 * 60 * 60 * 1000), // 12 hours from now
     pickupInstructions: 'Ring the bell at the side entrance',
@@ -21,7 +21,7 @@ export const mockFoodItems = [
     description: 'Traditional Tunisian couscous with vegetables, enough for 4 people',
     foodType: 'cooked-meals',
     quantity: '1 large pot',
-    imageUrl: '/api/placeholder/400/300',
+    imageUrl: 'https://hips.hearstapps.com/hmg-prod/images/best-couscous-recipes-israeli-couscous-crispy-garlic-1651512969.jpeg?crop=1.00xw:0.834xh;0,0.166xh&resize=980:*',
     location: 'Sfax',
     expiryDate: new Date(Date.now() + 6 * 60 * 60 * 1000), // 6 hours from now
     pickupInstructions: 'Available after 6 PM',
@@ -36,7 +36,7 @@ export const mockFoodItems = [
     description: 'Fresh oranges, apples, and pears from our fruit shop',
     foodType: 'fruits',
     quantity: '2 kg',
-    imageUrl: '/api/placeholder/400/300',
+    imageUrl: 'https://media.istockphoto.com/id/173255460/photo/assortment-of-fruits.jpg?s=612x612&w=0&k=20&c=9FCZJRCXbLH7KGVixrpQxl3GVGXepb2pXqkz-MkzDQM=',
     location: 'Sousse',
     expiryDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
     pickupInstructions: 'Shop closes at 8 PM',

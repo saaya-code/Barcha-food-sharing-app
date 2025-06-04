@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
 import { FoodItem, FoodRequest } from '@/types'
-import { hasValidSupabaseConfig, mockProfile, mockFoodItems } from './dev-config'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -59,32 +58,6 @@ export const getFoodItems = async (filters?: {
   search?: string
   expiry?: string
 }) => {
-  // In development mode without valid Supabase config, return mock data
-  if (!hasValidSupabaseConfig()) {
-    console.log('Using mock food items data (Supabase not configured)')
-    let filteredItems = [...mockFoodItems]
-    
-    if (filters?.category) {
-      filteredItems = filteredItems.filter(item => item.food_type === filters.category)
-    }
-    
-    if (filters?.location) {
-      filteredItems = filteredItems.filter(item => 
-        item.location.toLowerCase().includes(filters.location!.toLowerCase())
-      )
-    }
-    
-    if (filters?.search) {
-      const searchTerm = filters.search.toLowerCase()
-      filteredItems = filteredItems.filter(item => 
-        item.title.toLowerCase().includes(searchTerm) ||
-        item.description.toLowerCase().includes(searchTerm)
-      )
-    }
-    
-    return { data: filteredItems, error: null }
-  }
-
   try {
     let query = supabase
       .from(FOOD_ITEMS_TABLE)
@@ -132,15 +105,25 @@ export const getFoodItems = async (filters?: {
 
     return { data, error }
   } catch (error) {
-    console.error('Database error, falling back to mock data:', error)
-    return { data: mockFoodItems, error: null }
+    console.error('Database error:', error)
+    return { data: null, error }
   }
 }
 
-export const createFoodRequest = async (request: Omit<FoodRequest, 'id' | 'created_at'>) => {
+export const createFoodRequest = async (request: Omit<FoodRequest, 'id' | 'createdAt'>) => {
+  // Transform camelCase to snake_case for database
+  const dbRequest = {
+    food_item_id: request.foodItemId,
+    requester_id: request.requesterId,
+    requester_name: request.requesterName,
+    requester_contact: request.requesterContact,
+    message: request.message,
+    status: request.status
+  }
+  
   const { data, error } = await supabase
     .from(FOOD_REQUESTS_TABLE)
-    .insert([request])
+    .insert([dbRequest])
     .select()
     .single()
   
@@ -148,12 +131,6 @@ export const createFoodRequest = async (request: Omit<FoodRequest, 'id' | 'creat
 }
 
 export const getUserProfile = async (userId: string) => {
-  // In development mode without valid Supabase config, return mock data
-  if (!hasValidSupabaseConfig()) {
-    console.log('Using mock profile data (Supabase not configured)')
-    return { data: mockProfile, error: null }
-  }
-
   try {
     const { data, error } = await supabase
       .from(USERS_TABLE)
@@ -163,8 +140,8 @@ export const getUserProfile = async (userId: string) => {
     
     return { data, error }
   } catch (error) {
-    console.error('Database error, falling back to mock data:', error)
-    return { data: mockProfile, error: null }
+    console.error('Database error:', error)
+    return { data: null, error }
   }
 }
 
@@ -181,12 +158,6 @@ export const updateUserProfile = async (userId: string, updates: { name?: string
 }
 
 export const getUserFoodItems = async (userId: string) => {
-  // In development mode without valid Supabase config, return mock data
-  if (!hasValidSupabaseConfig()) {
-    console.log('Using mock food items data (Supabase not configured)')
-    return { data: mockFoodItems, error: null }
-  }
-
   try {
     const { data, error } = await supabase
       .from(FOOD_ITEMS_TABLE)
@@ -196,8 +167,8 @@ export const getUserFoodItems = async (userId: string) => {
     
     return { data, error }
   } catch (error) {
-    console.error('Database error, falling back to mock data:', error)
-    return { data: mockFoodItems, error: null }
+    console.error('Database error:', error)
+    return { data: null, error }
   }
 }
 
@@ -247,4 +218,157 @@ export const createUserProfile = async (userId: string, userData: { name: string
     .single()
   
   return { data, error }
+}
+
+// Food item management operations
+export const updateFoodItemAvailability = async (foodItemId: string, isAvailable: boolean) => {
+  const { data, error } = await supabase
+    .from(FOOD_ITEMS_TABLE)
+    .update({ 
+      is_available: isAvailable,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', foodItemId)
+    .select()
+    .single()
+  
+  return { data, error }
+}
+
+export const deleteFoodItem = async (foodItemId: string) => {
+  const { data, error } = await supabase
+    .from(FOOD_ITEMS_TABLE)
+    .delete()
+    .eq('id', foodItemId)
+    .select()
+    .single()
+  
+  return { data, error }
+}
+
+// Favorites operations
+export const addToFavorites = async (userId: string, foodItemId: string) => {
+  const { data, error } = await supabase
+    .from('favorites')
+    .insert([{
+      user_id: userId,
+      food_item_id: foodItemId
+    }])
+    .select()
+    .single()
+  
+  return { data, error }
+}
+
+export const removeFromFavorites = async (userId: string, foodItemId: string) => {
+  const { data, error } = await supabase
+    .from('favorites')
+    .delete()
+    .eq('user_id', userId)
+    .eq('food_item_id', foodItemId)
+    .select()
+    .single()
+  
+  return { data, error }
+}
+
+export const getUserFavorites = async (userId: string) => {
+  const { data, error } = await supabase
+    .from('favorites')
+    .select(`
+      *,
+      food_items (
+        id,
+        title,
+        description,
+        food_type,
+        quantity,
+        image_url,
+        location,
+        expiry_date,
+        pickup_instructions,
+        donor_id,
+        donor_name,
+        donor_contact,
+        contact_method,
+        is_available,
+        created_at,
+        updated_at
+      )
+    `)
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+  
+  return { data, error }
+}
+
+export const checkIfFavorited = async (userId: string, foodItemId: string) => {
+  const { data, error } = await supabase
+    .from('favorites')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('food_item_id', foodItemId)
+    .single()
+  
+  return { data: !!data, error }
+}
+
+// Notifications operations
+export const createNotification = async (notification: {
+  user_id: string
+  title: string
+  message: string
+  type?: 'info' | 'success' | 'warning' | 'error'
+  related_id?: string
+  related_type?: string
+}) => {
+  const { data, error } = await supabase
+    .from('notifications')
+    .insert([notification])
+    .select()
+    .single()
+  
+  return { data, error }
+}
+
+export const getUserNotifications = async (userId: string) => {
+  const { data, error } = await supabase
+    .from('notifications')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+  
+  return { data, error }
+}
+
+export const markNotificationAsRead = async (notificationId: string) => {
+  const { data, error } = await supabase
+    .from('notifications')
+    .update({ is_read: true })
+    .eq('id', notificationId)
+    .select()
+    .single()
+  
+  return { data, error }
+}
+
+export const markAllNotificationsAsRead = async (userId: string) => {
+  const { data, error } = await supabase
+    .from('notifications')
+    .update({ is_read: true })
+    .eq('user_id', userId)
+    .eq('is_read', false)
+    .select()
+  
+  return { data, error }
+}
+
+export const getUnreadNotificationCount = async (userId: string) => {
+  const { count, error } = await supabase
+    .from('notifications')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('is_read', false)
+  
+  return { count: count || 0, error }
 }

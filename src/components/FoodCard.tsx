@@ -6,8 +6,9 @@ import { MapPin, Clock, User, Heart } from 'lucide-react'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { useState } from 'react'
-import Image from 'next/image'
+import { useState, useEffect } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
+import { addToFavorites, removeFromFavorites, checkIfFavorited } from '@/lib/supabase'
 
 interface FoodCardProps {
   item: FoodItem
@@ -15,8 +16,53 @@ interface FoodCardProps {
 }
 
 export default function FoodCard({ item, onRequest }: FoodCardProps) {
+  const { user } = useAuth()
   const [isLiked, setIsLiked] = useState(false)
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false)
   const expiryStatus = formatExpiryTime(new Date(item.expiry_date))
+
+  // Check if item is favorited when component mounts
+  useEffect(() => {
+    const checkFavoriteStatus = async () => {
+      if (user) {
+        try {
+          const { data } = await checkIfFavorited(user.id, item.id)
+          setIsLiked(data)
+        } catch (error) {
+          console.error('Error checking favorite status:', error)
+        }
+      }
+    }
+
+    checkFavoriteStatus()
+  }, [user, item.id])
+
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    
+    if (!user) {
+      // Could show a toast or redirect to login
+      return
+    }
+
+    try {
+      setIsTogglingFavorite(true)
+      
+      if (isLiked) {
+        await removeFromFavorites(user.id, item.id)
+        setIsLiked(false)
+      } else {
+        await addToFavorites(user.id, item.id)
+        setIsLiked(true)
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error)
+      // Revert the state if there was an error
+      setIsLiked(!isLiked)
+    } finally {
+      setIsTogglingFavorite(false)
+    }
+  }
   
   const getExpiryBadgeVariant = () => {
     if (expiryStatus.includes('Expired')) return 'destructive'
@@ -46,10 +92,10 @@ export default function FoodCard({ item, onRequest }: FoodCardProps) {
       {/* Image Section */}
       <div className="relative h-48 overflow-hidden">
         {item.image_url ? (
-          <Image
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
             src={item.image_url}
             alt={item.title}
-            fill
             className="object-cover"
           />
         ) : (
@@ -61,17 +107,19 @@ export default function FoodCard({ item, onRequest }: FoodCardProps) {
         )}
         
         <button
-          onClick={(e) => {
-        e.stopPropagation()
-        setIsLiked(!isLiked)
-          }}
+          onClick={handleToggleFavorite}
+          disabled={isTogglingFavorite}
           className={`absolute top-3 right-3 p-2 rounded-full transition-all duration-200 ${
-        isLiked 
-          ? 'bg-red-500 text-white shadow-lg scale-110' 
-          : 'bg-white/80 text-gray-600 hover:bg-white hover:scale-105'
-          }`}
+            isLiked 
+              ? 'bg-red-500 text-white shadow-lg scale-110' 
+              : 'bg-white/80 text-gray-600 hover:bg-white hover:scale-105'
+          } ${isTogglingFavorite ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          <Heart size={16} fill={isLiked ? "white" : "none"} />
+          {isTogglingFavorite ? (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+          ) : (
+            <Heart size={16} fill={isLiked ? "white" : "none"} />
+          )}
         </button>
         
         {/* Category Badge */}

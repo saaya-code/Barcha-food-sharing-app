@@ -45,6 +45,28 @@ CREATE TABLE public.food_requests (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
 );
 
+-- Create favorites table
+CREATE TABLE public.favorites (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
+    food_item_id UUID REFERENCES public.food_items(id) ON DELETE CASCADE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+    UNIQUE(user_id, food_item_id)
+);
+
+-- Create notifications table
+CREATE TABLE public.notifications (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
+    title TEXT NOT NULL,
+    message TEXT NOT NULL,
+    type TEXT DEFAULT 'info' CHECK (type IN ('info', 'success', 'warning', 'error')),
+    is_read BOOLEAN DEFAULT false,
+    related_id UUID, -- Can reference food_item_id, request_id, etc.
+    related_type TEXT, -- 'food_item', 'request', etc.
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
 -- Create indexes for better performance
 CREATE INDEX idx_food_items_donor_id ON public.food_items(donor_id);
 CREATE INDEX idx_food_items_expiry_date ON public.food_items(expiry_date);
@@ -54,11 +76,17 @@ CREATE INDEX idx_food_items_is_available ON public.food_items(is_available);
 CREATE INDEX idx_food_requests_food_item_id ON public.food_requests(food_item_id);
 CREATE INDEX idx_food_requests_requester_id ON public.food_requests(requester_id);
 CREATE INDEX idx_food_requests_status ON public.food_requests(status);
+CREATE INDEX idx_favorites_user_id ON public.favorites(user_id);
+CREATE INDEX idx_favorites_food_item_id ON public.favorites(food_item_id);
+CREATE INDEX idx_notifications_user_id ON public.notifications(user_id);
+CREATE INDEX idx_notifications_is_read ON public.notifications(is_read);
 
 -- Set up Row Level Security (RLS)
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.food_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.food_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.favorites ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for users table
 CREATE POLICY "Users can view own profile" ON public.users
@@ -101,12 +129,32 @@ CREATE POLICY "Authenticated users can create requests" ON public.food_requests
 CREATE POLICY "Requesters can update own requests" ON public.food_requests
     FOR UPDATE USING (auth.uid() = requester_id);
 
-CREATE POLICY "Donors can update requests for their items" ON public.food_requests
+CREATE POLICY "Donors can update request status" ON public.food_requests
     FOR UPDATE USING (
         auth.uid() IN (
             SELECT donor_id FROM public.food_items WHERE id = food_item_id
         )
     );
+
+-- Create policies for favorites table
+CREATE POLICY "Users can view own favorites" ON public.favorites
+    FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can add to favorites" ON public.favorites
+    FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can remove from favorites" ON public.favorites
+    FOR DELETE USING (auth.uid() = user_id);
+
+-- Create policies for notifications table
+CREATE POLICY "Users can view own notifications" ON public.notifications
+    FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "System can create notifications" ON public.notifications
+    FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Users can update own notifications" ON public.notifications
+    FOR UPDATE USING (auth.uid() = user_id);
 
 -- Create function to automatically create user profile
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -174,4 +222,10 @@ CREATE TRIGGER update_food_items_updated_at BEFORE UPDATE ON public.food_items
     FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 CREATE TRIGGER update_food_requests_updated_at BEFORE UPDATE ON public.food_requests
+    FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+CREATE TRIGGER update_favorites_updated_at BEFORE UPDATE ON public.favorites
+    FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+CREATE TRIGGER update_notifications_updated_at BEFORE UPDATE ON public.notifications
     FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();

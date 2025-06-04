@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext'
 
 export default function SignupPage() {
   const router = useRouter()
-  const { signUp, user } = useAuth()
+  const { signUp, signInWithGoogle, user } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -81,6 +81,22 @@ export default function SignupPage() {
       alert('Signup failed. Please try again.')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setError('')
+      const { error } = await signInWithGoogle()
+      
+      if (error) {
+        console.error('Google sign-in error:', error)
+        setError('Failed to sign in with Google. Please try again.')
+      }
+      // The redirect will be handled by the OAuth flow
+    } catch (error) {
+      console.error('Google sign-in error:', error)
+      setError('An unexpected error occurred during Google sign-in.')
     }
   }
 
@@ -252,6 +268,7 @@ export default function SignupPage() {
 
               <button
                 type="button"
+                onClick={handleGoogleSignIn}
                 className="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
               >
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">

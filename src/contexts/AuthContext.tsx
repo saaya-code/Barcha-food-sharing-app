@@ -11,6 +11,7 @@ interface AuthContextType {
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: unknown }>
   signUp: (email: string, password: string, userData: { name: string; whatsapp_number?: string }) => Promise<{ error: unknown }>
+  signInWithGoogle: () => Promise<{ error: unknown }>
   signOut: () => Promise<void>
 }
 
@@ -20,6 +21,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   signIn: async () => ({ error: null }),
   signUp: async () => ({ error: null }),
+  signInWithGoogle: async () => ({ error: null }),
   signOut: async () => {},
 })
 
@@ -74,6 +76,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           if (event === 'SIGNED_UP' as AuthChangeEvent && session?.user) {
             await createUserProfile(session.user)
           }
+
+          // Create user profile for Google OAuth if it doesn't exist
+          if (event === 'SIGNED_IN' as AuthChangeEvent && session?.user) {
+            // Check if this is a Google OAuth sign-in by looking at the provider
+            if (session.user.app_metadata?.provider === 'google') {
+              await createUserProfileIfNotExists(session.user)
+            }
+          }
         }
       )
 
@@ -106,6 +116,44 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
+  const createUserProfileIfNotExists = async (user: User) => {
+    try {
+      // Check if user profile already exists
+      const { data: existingProfile, error: checkError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('id', user.id)
+        .single()
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        // PGRST116 is "row not found" error, which is expected if profile doesn't exist
+        console.error('Error checking user profile:', checkError)
+        return
+      }
+
+      // If profile doesn't exist, create one
+      if (!existingProfile) {
+        const { error } = await supabase
+          .from('users')
+          .insert([
+            {
+              id: user.id,
+              email: user.email!,
+              name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'Google User',
+              whatsapp_number: null,
+              total_donations: 0,
+            }
+          ])
+        
+        if (error) {
+          console.error('Error creating Google user profile:', error)
+        }
+      }
+    } catch (error) {
+      console.error('Error creating Google user profile:', error)
+    }
+  }
+
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -129,12 +177,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await supabase.auth.signOut()
   }
 
+  const signInWithGoogle = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    })
+    return { error }
+  }
+
   const value = {
     user,
     session,
     loading,
     signIn,
     signUp,
+    signInWithGoogle,
     signOut,
   }
 

@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react'
 import { X, Image as ImageIcon } from 'lucide-react'
 import Image from 'next/image'
-import { uploadImageToCloudinary, getOptimizedImageUrl } from '@/lib/cloudinary'
+import { uploadImageToCloudinary } from '@/lib/cloudinary'
 
 interface ImageUploadProps {
   onImageUploaded: (imageUrl: string) => void
@@ -78,7 +78,7 @@ export default function ImageUpload({
         <div className="relative">
           <div className="w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
             <Image
-              src={getOptimizedImageUrl(currentImage, { width: 400, height: 300 })}
+              src={currentImage}
               alt="Food item"
               width={400}
               height={300}

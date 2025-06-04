@@ -2,10 +2,10 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { Menu, X, Plus, LogOut, Heart, Bell } from 'lucide-react'
+import { Menu, X, Plus, LogOut, Heart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { useAuth } from '@/contexts/AuthContext'
+import { NotificationBell } from '@/components/NotificationBell'
 
 export default function Header() {
   const { user, signOut } = useAuth()
@@ -58,17 +58,12 @@ export default function Header() {
             {user ? (
               <>
                 {/* Notifications */}
-                <button className="relative p-3 text-gray-700 hover:text-green-600 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 rounded-xl transition-all duration-300 backdrop-blur-sm border border-transparent hover:border-green-200 hover:shadow-md">
-                  <Bell size={22} />
-                  <Badge variant="destructive" className="absolute -top-1 -right-1 h-6 w-6 text-xs p-0 flex items-center justify-center shadow-lg animate-pulse">
-                    2
-                  </Badge>
-                </button>
+                <NotificationBell />
 
                 {/* Favorites */}
-                <button className="p-3 text-gray-700 hover:text-red-500 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 rounded-xl transition-all duration-300 backdrop-blur-sm border border-transparent hover:border-red-200 hover:shadow-md">
+                <Link href="/favorites" className="p-3 text-gray-700 hover:text-red-500 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 rounded-xl transition-all duration-300 backdrop-blur-sm border border-transparent hover:border-red-200 hover:shadow-md">
                   <Heart size={22} />
-                </button>
+                </Link>
 
                 {/* User Menu */}
                 <div className="relative">
@@ -93,6 +88,9 @@ export default function Header() {
                       </Link>
                       <Link href="/my-items" className="block px-5 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 hover:text-green-600 transition-all duration-200">
                         My Items
+                      </Link>
+                      <Link href="/favorites" className="block px-5 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 hover:text-red-600 transition-all duration-200">
+                        Favorites
                       </Link>
                       <Link href="/requests" className="block px-5 py-3 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 hover:text-green-600 transition-all duration-200">
                         My Requests

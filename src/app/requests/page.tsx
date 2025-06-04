@@ -43,6 +43,7 @@ export default function RequestsPage() {
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'approved' | 'completed'>('all')
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const loadRequests = async () => {
     try {
       setLoading(true)
@@ -199,6 +200,7 @@ export default function RequestsPage() {
                     <div className="bg-gray-50 rounded-lg p-4 mb-4">
                       <div className="flex items-start space-x-4">
                         {request.food_items?.image_url && (
+                          // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={request.food_items.image_url}
                             alt={request.food_items.title}

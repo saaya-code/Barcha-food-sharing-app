@@ -53,6 +53,7 @@ export default function AddItemPage() {
   }
 
   const handleImageUploaded = (url: string) => {
+    console.log('Image uploaded:', url)
     setImageUrl(url)
   }
 
@@ -142,6 +143,12 @@ export default function AddItemPage() {
             </p>
           </div>
 
+          {error && (
+            <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Photo Upload */}
             <div>
@@ -167,7 +174,7 @@ export default function AddItemPage() {
                   placeholder="e.g., Fresh bread, Homemade pasta"
                   value={formData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70 text-gray-900"
                 />
               </div>
 
@@ -179,7 +186,7 @@ export default function AddItemPage() {
                   required
                   value={formData.foodType}
                   onChange={(e) => handleInputChange('foodType', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70 text-gray-900"
                 >
                   {FOOD_CATEGORIES.map((category) => (
                     <option key={category.value} value={category.value}>
@@ -200,7 +207,7 @@ export default function AddItemPage() {
                 placeholder="Describe the food, its condition, and any relevant details..."
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70 resize-none"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70 resize-none text-gray-900"
               />
             </div>
 
@@ -215,7 +222,7 @@ export default function AddItemPage() {
                   placeholder="e.g., 2 loaves, 1 kg, 4 servings"
                   value={formData.quantity}
                   onChange={(e) => handleInputChange('quantity', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70 text-gray-900"
                 />
               </div>
 
@@ -230,7 +237,7 @@ export default function AddItemPage() {
                   placeholder="e.g., Tunis Centre, Sfax"
                   value={formData.location}
                   onChange={(e) => handleInputChange('location', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70 text-gray-900"
                 />
               </div>
             </div>
@@ -249,7 +256,7 @@ export default function AddItemPage() {
                   max={getTomorrowDate()}
                   value={formData.expiryDate}
                   onChange={(e) => handleInputChange('expiryDate', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70 text-gray-900"
                 />
               </div>
 
@@ -261,7 +268,7 @@ export default function AddItemPage() {
                   type="time"
                   value={formData.expiryTime}
                   onChange={(e) => handleInputChange('expiryTime', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70 text-gray-900"
                 />
               </div>
             </div>
@@ -287,7 +294,7 @@ export default function AddItemPage() {
                     placeholder="Your full name"
                     value={formData.donorName}
                     onChange={(e) => handleInputChange('donorName', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70 text-gray-900"
                   />
                 </div>
 
@@ -299,7 +306,7 @@ export default function AddItemPage() {
                     required
                     value={formData.contactMethod}
                     onChange={(e) => handleInputChange('contactMethod', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70 text-gray-900"
                   >
                     <option value="phone">Phone</option>
                     <option value="whatsapp">WhatsApp</option>
@@ -323,7 +330,7 @@ export default function AddItemPage() {
                   }
                   value={formData.donorContact}
                   onChange={(e) => handleInputChange('donorContact', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70 text-gray-900"
                 />
               </div>
             </div>
@@ -339,7 +346,7 @@ export default function AddItemPage() {
                 placeholder="e.g., Ring the side door bell, Available after 6 PM, Located near the market..."
                 value={formData.pickupInstructions}
                 onChange={(e) => handleInputChange('pickupInstructions', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70 resize-none"
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70 resize-none text-gray-900"
               />
             </div>
 

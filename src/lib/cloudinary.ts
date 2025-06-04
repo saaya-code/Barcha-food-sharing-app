@@ -32,29 +32,3 @@ export const uploadImageToCloudinary = async (file: File): Promise<string> => {
   }
 }
 
-// Helper function to generate optimized image URL
-export const getOptimizedImageUrl = (publicId: string, options: {
-  width?: number
-  height?: number
-  quality?: string
-  format?: string
-} = {}) => {
-  const { width = 400, height = 300, quality = 'auto', format = 'auto' } = options
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
-  
-  if (!cloudName) {
-    return publicId // Return original URL if Cloudinary not configured
-  }
-  
-  // Build transformation string
-  const transformations = [
-    `w_${width}`,
-    `h_${height}`,
-    'c_fill',
-    `q_${quality}`,
-    `f_${format}`,
-    'dpr_auto'
-  ].join(',')
-  
-  return `https://res.cloudinary.com/${cloudName}/image/upload/${transformations}/${publicId}`
-}

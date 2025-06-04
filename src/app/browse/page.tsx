@@ -4,13 +4,16 @@ import { useState, useMemo, useEffect } from 'react'
 import Header from '@/components/Header'
 import FoodCard from '@/components/FoodCard'
 import SearchFilters from '@/components/SearchFilters'
+import RequestModal from '@/components/RequestModal'
 import { FoodItem } from '@/types'
-import { getFoodItems } from '@/lib/supabase'
+import { getFoodItems, createFoodRequest } from '@/lib/supabase'
 
 export default function BrowsePage() {
   const [foodItems, setFoodItems] = useState<FoodItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [requestModalOpen, setRequestModalOpen] = useState(false)
+  const [selectedFoodItem, setSelectedFoodItem] = useState<FoodItem | null>(null)
   const [filterValues, setFilterValues] = useState({
     searchQuery: '',
     selectedCategory: '',
@@ -29,7 +32,7 @@ export default function BrowsePage() {
       const { data, error } = await getFoodItems()
       
       if (error) {
-        setError(error.message)
+        setError(error?.message || 'Failed to load food items')
         return
       }
 
@@ -95,8 +98,40 @@ export default function BrowsePage() {
   }, [filterValues, foodItems])
 
   const handleRequestFood = (item: FoodItem) => {
-    // This will be implemented with actual request functionality later
-    alert(`Request sent for: ${item.title}\nContact: ${item.donor_contact}`)
+    setSelectedFoodItem(item)
+    setRequestModalOpen(true)
+  }
+
+  const handleSubmitRequest = async (requestData: {
+    foodItemId: string
+    requesterId: string
+    requesterName: string
+    requesterContact: string
+    message: string
+  }) => {
+    try {
+      const { error } = await createFoodRequest({
+        foodItemId: requestData.foodItemId,
+        requesterId: requestData.requesterId,
+        requesterName: requestData.requesterName,
+        requesterContact: requestData.requesterContact,
+        message: requestData.message,
+        status: 'pending'
+      })
+
+      if (error) {
+        throw error
+      }
+
+      // Show success message briefly
+      setError('')
+      // You could add a success toast here
+      console.log('Request submitted successfully!')
+      
+    } catch (err) {
+      console.error('Error submitting request:', err)
+      throw err // Re-throw to let the modal handle the error display
+    }
   }
 
   return (
@@ -210,6 +245,19 @@ export default function BrowsePage() {
           </>
         )}
       </div>
+      
+      {/* Request Modal */}
+      {requestModalOpen && selectedFoodItem && (
+        <RequestModal
+          foodItem={selectedFoodItem}
+          isOpen={requestModalOpen}
+          onClose={() => {
+            setRequestModalOpen(false)
+            setSelectedFoodItem(null)
+          }}
+          onSubmit={handleSubmitRequest}
+        />
+      )}
     </div>
   )
 }

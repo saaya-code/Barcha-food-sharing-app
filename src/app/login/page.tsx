@@ -9,7 +9,7 @@ import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
-  const { signIn, user, loading } = useAuth()
+  const { signIn, signInWithGoogle, user, loading } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -53,8 +53,19 @@ export default function LoginPage() {
   }
 
   const handleGoogleSignIn = async () => {
-    // TODO: Implement Google OAuth with Supabase
-    setError('Google sign-in is not yet implemented.')
+    try {
+      setError('')
+      const { error } = await signInWithGoogle()
+      
+      if (error) {
+        console.error('Google sign-in error:', error)
+        setError('Failed to sign in with Google. Please try again.')
+      }
+      // The redirect will be handled by the OAuth flow
+    } catch (error) {
+      console.error('Google sign-in error:', error)
+      setError('An unexpected error occurred during Google sign-in.')
+    }
   }
 
   if (loading) {
