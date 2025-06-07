@@ -1,50 +1,47 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { getUserFoodItems, updateFoodItemAvailability } from '@/lib/supabase'
 import { FoodItem } from '@/types'
-import Header from '@/components/Header'
+import { Header } from '@/components/Header'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { MapPin, Clock, Eye, EyeOff, Plus, Edit } from 'lucide-react'
 import { formatExpiryTime } from '@/lib/utils'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 export default function MyItemsPage() {
   const { user, loading } = useAuth()
+  const t = useTranslations()
   const [items, setItems] = useState<FoodItem[]>([])
   const [loadingItems, setLoadingItems] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
 
   useEffect(() => {
+    const loadUserItems = async () => {
+      if (!user) return
+
+      try {
+        setLoadingItems(true)
+        setError(null)
+        const userItems = await getUserFoodItems(user.id)
+        setItems(userItems)
+      } catch (err) {
+        setError(t('myItems.error') || 'Failed to load your items')
+        console.error('Error loading user items:', err)
+      } finally {
+        setLoadingItems(false)
+      }
+    }
+
     if (user) {
       loadUserItems()
     }
-  }, [user, loadUserItems])
-
-  const loadUserItems = async () => {
-    if (!user) return
-
-    try {
-      setLoadingItems(true)
-      const { data, error } = await getUserFoodItems(user.id)
-      
-      if (error) {
-        setError('Failed to load your items')
-        console.error('Error loading user items:', error)
-      } else {
-        setItems(data || [])
-      }
-    } catch (err) {
-      setError('An unexpected error occurred')
-      console.error('Error:', err)
-    } finally {
-      setLoadingItems(false)
-    }
-  }
+  }, [user])
 
   const toggleAvailability = async (itemId: string, currentAvailability: boolean) => {
     try {
@@ -52,7 +49,7 @@ export default function MyItemsPage() {
       const { error } = await updateFoodItemAvailability(itemId, !currentAvailability)
       
       if (error) {
-        setError('Failed to update item availability')
+        setError(t('myItems.error') || 'Failed to update item availability')
         console.error('Error updating availability:', error)
       } else {
         // Update local state
@@ -63,7 +60,7 @@ export default function MyItemsPage() {
         ))
       }
     } catch (err) {
-      setError('An unexpected error occurred')
+      setError(t('common.error') || 'An unexpected error occurred')
       console.error('Error:', err)
     } finally {
       setUpdatingId(null)
@@ -98,7 +95,7 @@ export default function MyItemsPage() {
         <div className="flex items-center justify-center min-h-[50vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading...</p>
+            <p className="text-gray-600">{t('common.loading')}</p>
           </div>
         </div>
       </div>
@@ -112,11 +109,11 @@ export default function MyItemsPage() {
         <div className="flex items-center justify-center min-h-[50vh]">
           <Card className="w-full max-w-md">
             <CardContent className="p-8 text-center">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Sign In Required</h2>
-              <p className="text-gray-600 mb-6">You need to sign in to view your items.</p>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">{t('auth.signInRequired')}</h2>
+              <p className="text-gray-600 mb-6">{t('myItems.mustBeLoggedIn')}</p>
               <Link href="/login">
                 <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700">
-                  Sign In
+                  {t('auth.signIn')}
                 </Button>
               </Link>
             </CardContent>
@@ -135,13 +132,13 @@ export default function MyItemsPage() {
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">My Food Items</h1>
-              <p className="text-gray-600">Manage your food donations and availability</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('myItems.title')}</h1>
+              <p className="text-gray-600">{t('myItems.subtitle')}</p>
             </div>
             <Link href="/add-item">
               <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg">
                 <Plus size={20} className="mr-2" />
-                Add New Item
+                {t('myItems.addNewItem')}
               </Button>
             </Link>
           </div>
@@ -159,7 +156,7 @@ export default function MyItemsPage() {
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading your items...</p>
+              <p className="text-gray-600">{t('myItems.loadingItems')}</p>
             </div>
           </div>
         ) : items.length === 0 ? (
@@ -167,12 +164,12 @@ export default function MyItemsPage() {
           <Card className="text-center py-12">
             <CardContent>
               <div className="text-6xl mb-4">🍽️</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No items yet</h3>
-              <p className="text-gray-600 mb-6">Start sharing food with your community by adding your first item.</p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">{t('myItems.noItems')}</h3>
+              <p className="text-gray-600 mb-6">{t('myItems.startSharing')}</p>
               <Link href="/add-item">
                 <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700">
                   <Plus size={20} className="mr-2" />
-                  Add Your First Item
+                  {t('myItems.addFirstItem')}
                 </Button>
               </Link>
             </CardContent>
@@ -182,7 +179,6 @@ export default function MyItemsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {items.map((item) => {
               const expiryStatus = formatExpiryTime(new Date(item.expiry_date))
-              const isExpired = new Date(item.expiry_date).getTime() < Date.now()
               
               return (
                 <Card key={item.id} className="hover:shadow-xl transition-all duration-300 overflow-hidden">
@@ -227,7 +223,7 @@ export default function MyItemsPage() {
                       variant="secondary" 
                       className="absolute top-3 left-3 bg-white/90 text-gray-700 font-medium shadow-sm"
                     >
-                      {item.food_type.charAt(0).toUpperCase() + item.food_type.slice(1).replace('-', ' ')}
+                      {t(`categories.${item.food_type}`)}
                     </Badge>
 
                     {/* Status Indicator */}
@@ -236,7 +232,7 @@ export default function MyItemsPage() {
                         item.is_available ? 'bg-green-600' : 'bg-gray-600'
                       }`}
                     >
-                      {item.is_available ? 'Available' : 'Hidden'}
+                      {item.is_available ? t('foodCard.available') : t('myItems.hidden')}
                     </Badge>
                   </div>
 
@@ -274,7 +270,7 @@ export default function MyItemsPage() {
                       {item.pickup_instructions && (
                         <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
                           <p className="text-xs text-amber-800">
-                            <span className="font-semibold">Pickup: </span>
+                            <span className="font-semibold">{t('myItems.pickup')}: </span>
                             {item.pickup_instructions}
                           </p>
                         </div>
@@ -284,7 +280,7 @@ export default function MyItemsPage() {
 
                   <div className="p-5 pt-0 flex items-center justify-between">
                     <div className="text-sm text-gray-600">
-                      Created {new Date(item.created_at).toLocaleDateString()}
+                      {t('myItems.created')} {new Date(item.created_at).toLocaleDateString()}
                     </div>
                     
                     <Button 
@@ -293,7 +289,7 @@ export default function MyItemsPage() {
                       className="hover:bg-green-50 hover:border-green-300"
                     >
                       <Edit size={16} className="mr-1" />
-                      Edit
+                      {t('myItems.editItem')}
                     </Button>
                   </div>
                 </Card>

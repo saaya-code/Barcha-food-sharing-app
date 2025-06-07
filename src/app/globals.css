@@ -30,3 +30,36 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* RTL Support */
+[dir="rtl"] {
+  direction: rtl;
+}
+
+[dir="rtl"] .text-left {
+  text-align: right;
+}
+
+[dir="rtl"] .text-right {
+  text-align: left;
+}
+
+[dir="rtl"] .ml-auto {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+[dir="rtl"] .mr-auto {
+  margin-right: 0;
+  margin-left: auto;
+}
+
+/* Better Arabic font support */
+[lang="ar"] {
+  font-family: 'Segoe UI', 'Tahoma', 'Noto Sans Arabic', 'Arabic UI Text', Arial, Helvetica, sans-serif;
+  font-feature-settings: "liga" off;
+}
+
+[lang="ar"] * {
+  font-family: 'Segoe UI', 'Tahoma', 'Noto Sans Arabic', 'Arabic UI Text', Arial, Helvetica, sans-serif;
+}

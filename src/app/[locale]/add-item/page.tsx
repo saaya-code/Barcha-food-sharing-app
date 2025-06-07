@@ -2,27 +2,19 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Header from '@/components/Header'
+import {Header} from '@/components/Header'
 import ImageUpload from '@/components/ImageUpload'
 import { Calendar, MapPin, User, Phone, MessageSquare } from 'lucide-react'
 import { FoodCategory } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
 import { createFoodItem } from '@/lib/supabase'
-
-const FOOD_CATEGORIES: { value: FoodCategory; label: string }[] = [
-  { value: 'bread', label: 'Bread & Bakery' },
-  { value: 'fruits', label: 'Fruits' },
-  { value: 'vegetables', label: 'Vegetables' },
-  { value: 'cooked-meals', label: 'Cooked Meals' },
-  { value: 'dairy', label: 'Dairy' },
-  { value: 'desserts', label: 'Desserts' },
-  { value: 'beverages', label: 'Beverages' },
-  { value: 'other', label: 'Other' }
-]
+import { useTranslations, useLocale } from 'next-intl'
 
 export default function AddItemPage() {
   const router = useRouter()
   const { user } = useAuth()
+  const t = useTranslations()
+  const locale = useLocale()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [imageUrl, setImageUrl] = useState('')
@@ -43,9 +35,20 @@ export default function AddItemPage() {
   // Redirect if user is not logged in
   useEffect(() => {
     if (!user) {
-      router.push('/login')
+      router.push(`/${locale}/login`)
     }
-  }, [user, router])
+  }, [user, router, locale])
+
+  const FOOD_CATEGORIES: { value: FoodCategory; label: string }[] = [
+    { value: 'bread', label: t('categories.bread') },
+    { value: 'fruits', label: t('categories.fruits') },
+    { value: 'vegetables', label: t('categories.vegetables') },
+    { value: 'cooked-meals', label: t('categories.cookedMeals') },
+    { value: 'dairy', label: t('categories.dairy') },
+    { value: 'desserts', label: t('categories.desserts') },
+    { value: 'beverages', label: t('categories.beverages') },
+    { value: 'other', label: t('categories.other') }
+  ]
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -68,14 +71,14 @@ export default function AddItemPage() {
 
     try {
       if (!user) {
-        setError('You must be logged in to add items')
+        setError(t('addItem.mustBeLoggedIn'))
         return
       }
 
       // Validate required fields
       if (!formData.title || !formData.description || !formData.quantity || 
           !formData.location || !formData.expiryDate || !formData.expiryTime) {
-        setError('Please fill in all required fields')
+        setError(t('addItem.fillAllFields'))
         return
       }
 
@@ -84,7 +87,7 @@ export default function AddItemPage() {
       
       // Check if expiry date is in the future
       if (expiryDateTime <= new Date()) {
-        setError('Expiry date must be in the future')
+        setError(t('addItem.expiryFuture'))
         return
       }
 
@@ -111,11 +114,11 @@ export default function AddItemPage() {
       }
 
       // Success
-      alert('Food item added successfully!')
-      router.push('/browse')
+      alert(t('addItem.success'))
+      router.push(`/${locale}/browse`)
     } catch (error) {
       console.error('Error submitting food item:', error)
-      setError('Error posting food item. Please try again.')
+      setError(t('addItem.error'))
     } finally {
       setIsSubmitting(false)
     }
@@ -137,9 +140,9 @@ export default function AddItemPage() {
             <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
               <span className="text-white text-2xl">🍽️</span>
             </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">Add Food Item</h1>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">{t('addItem.title')}</h1>
             <p className="text-gray-600">
-              Share your surplus food with the community and help reduce waste.
+              {t('addItem.subtitle')}
             </p>
           </div>
 
@@ -153,7 +156,7 @@ export default function AddItemPage() {
             {/* Photo Upload */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Photo (Optional)
+                {t('addItem.image')}
               </label>
               <ImageUpload
                 onImageUploaded={handleImageUploaded}
@@ -166,12 +169,12 @@ export default function AddItemPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Food Title *
+                  {t('addItem.name')} *
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g., Fresh bread, Homemade pasta"
+                  placeholder={t('addItem.namePlaceholder')}
                   value={formData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white/70 text-gray-900"

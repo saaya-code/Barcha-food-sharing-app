@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { getUserNotifications, markNotificationAsRead, markAllNotificationsAsRead, getUnreadNotificationCount } from '@/lib/supabase'
 import { Bell, X, Check, CheckCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useTranslations } from 'next-intl'
+
 
 interface Notification {
   id: string
@@ -29,14 +30,9 @@ export function NotificationsDropdown({ isOpen, onClose }: NotificationsDropdown
   const { user } = useAuth()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(false)
+  const t = useTranslations('notifications')
 
-  useEffect(() => {
-    if (isOpen && user) {
-      loadNotifications()
-    }
-  }, [isOpen, user])
-
-  const loadNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
     if (!user) return
 
     try {
@@ -53,7 +49,13 @@ export function NotificationsDropdown({ isOpen, onClose }: NotificationsDropdown
     } finally {
       setLoading(false)
     }
-  }
+  }, [user])
+
+  useEffect(() => {
+    if (isOpen && user) {
+      loadNotifications()
+    }
+  }, [isOpen, user, loadNotifications])
 
   const markAsRead = async (notificationId: string) => {
     try {
@@ -100,7 +102,7 @@ export function NotificationsDropdown({ isOpen, onClose }: NotificationsDropdown
   return (
     <div className="absolute right-0 mt-2 w-96 bg-white/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/20 z-50 max-h-96 overflow-hidden">
       <div className="flex items-center justify-between p-4 border-b border-gray-100">
-        <h3 className="font-semibold text-gray-900">Notifications</h3>
+        <h3 className="font-semibold text-gray-900">{t('title')}</h3>
         <div className="flex items-center gap-2">
           {notifications.some(n => !n.is_read) && (
             <Button
@@ -110,7 +112,7 @@ export function NotificationsDropdown({ isOpen, onClose }: NotificationsDropdown
               className="text-xs text-green-600 hover:text-green-700"
             >
               <CheckCheck size={14} className="mr-1" />
-              Mark all read
+              {t('markAllRead')}
             </Button>
           )}
           <Button
@@ -132,7 +134,7 @@ export function NotificationsDropdown({ isOpen, onClose }: NotificationsDropdown
         ) : notifications.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <Bell size={24} className="mx-auto mb-2 opacity-50" />
-            <p className="text-sm">No notifications yet</p>
+            <p className="text-sm">{t('noNotifications')}</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
@@ -197,16 +199,7 @@ export function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
 
-  useEffect(() => {
-    if (user) {
-      loadUnreadCount()
-      // Set up interval to check for new notifications every 30 seconds
-      const interval = setInterval(loadUnreadCount, 30000)
-      return () => clearInterval(interval)
-    }
-  }, [user])
-
-  const loadUnreadCount = async () => {
+  const loadUnreadCount = useCallback(async () => {
     if (!user) return
 
     try {
@@ -220,7 +213,16 @@ export function NotificationBell() {
     } catch (err) {
       console.error('Error:', err)
     }
-  }
+  }, [user])
+
+  useEffect(() => {
+    if (user) {
+      loadUnreadCount()
+      // Set up interval to check for new notifications every 30 seconds
+      const interval = setInterval(loadUnreadCount, 30000)
+      return () => clearInterval(interval)
+    }
+  }, [user, loadUnreadCount])
 
   return (
     <div className="relative">

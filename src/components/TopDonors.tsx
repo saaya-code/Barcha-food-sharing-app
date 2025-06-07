@@ -2,6 +2,7 @@
 
 import { Trophy, Medal, Award } from 'lucide-react'
 import { User } from '@/types'
+import { useTranslations } from 'next-intl'
 
 interface TopDonorsProps {
   users: User[]
@@ -9,6 +10,7 @@ interface TopDonorsProps {
 }
 
 export default function TopDonors({ users, limit = 5 }: TopDonorsProps) {
+  const t = useTranslations()
   const topUsers = users
     .sort((a, b) => b.total_donations - a.total_donations)
     .slice(0, limit)
@@ -45,7 +47,7 @@ export default function TopDonors({ users, limit = 5 }: TopDonorsProps) {
         <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-amber-600 rounded-lg flex items-center justify-center shadow-lg">
           <Trophy className="text-white" size={20} />
         </div>
-        <h2 className="text-xl font-bold bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent">Top Donors This Week</h2>
+        <h2 className="text-xl font-bold bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent">{t('topDonors.title')}</h2>
       </div>
       
       <div className="space-y-3">
@@ -64,14 +66,14 @@ export default function TopDonors({ users, limit = 5 }: TopDonorsProps) {
               <div>
                 <h3 className="font-medium text-gray-900">{user.name}</h3>
                 <p className="text-sm text-gray-500">
-                  {user.total_donations} donation{user.total_donations !== 1 ? 's' : ''}
+                  {user.total_donations} {t('topDonors.donation', { count: user.total_donations })}
                 </p>
               </div>
             </div>
             
             {index === 0 && (
               <div className="flex items-center space-x-1 text-green-600">
-                <span className="text-sm font-medium">Champion</span>
+                <span className="text-sm font-medium">{t('topDonors.champion')}</span>
                 <Trophy size={16} />
               </div>
             )}
@@ -81,15 +83,15 @@ export default function TopDonors({ users, limit = 5 }: TopDonorsProps) {
         {topUsers.length === 0 && (
           <div className="text-center py-8 text-gray-500">
             <Trophy size={48} className="mx-auto mb-2 text-gray-300" />
-            <p>No donations yet this week.</p>
-            <p className="text-sm">Be the first to share food!</p>
+            <p>{t('topDonors.noDonations')}</p>
+            <p className="text-sm">{t('topDonors.beFirst')}</p>
           </div>
         )}
       </div>
       
       <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
         <p className="text-sm text-green-800 text-center">
-          🌱 Every donation helps reduce food waste and supports our community!
+          🌱 {t('topDonors.communityMessage')}
         </p>
       </div>
     </div>

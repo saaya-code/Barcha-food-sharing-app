@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import Header from '@/components/Header'
 import FoodCard from '@/components/FoodCard'
 import SearchFilters from '@/components/SearchFilters'
 import RequestModal from '@/components/RequestModal'
 import { FoodItem } from '@/types'
 import { getFoodItems, createFoodRequest } from '@/lib/supabase'
+import { useTranslations, useLocale } from 'next-intl'
 
 export default function BrowsePage() {
   const [foodItems, setFoodItems] = useState<FoodItem[]>([])
@@ -20,6 +20,8 @@ export default function BrowsePage() {
     selectedLocation: '',
     selectedExpiry: ''
   })
+  const t = useTranslations()
+  const locale = useLocale()
 
   // Fetch food items from Supabase
   useEffect(() => {
@@ -32,7 +34,7 @@ export default function BrowsePage() {
       const { data, error } = await getFoodItems()
       
       if (error) {
-        setError(error?.message || 'Failed to load food items')
+        setError(String(error) || 'Failed to load food items')
         return
       }
 
@@ -136,16 +138,14 @@ export default function BrowsePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50">
-      <Header />
-      
       <section className="bg-white/80 backdrop-blur-sm border-b border-white/20 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-              Browse Available Food
+              {t('browse.title')}
             </h1>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              Discover surplus food available for pickup in your area and help reduce food waste
+              {t('browse.subtitle')}
             </p>
           </div>
         </div>
@@ -189,11 +189,11 @@ export default function BrowsePage() {
             {/* Results Header */}
             <div className="mb-8 flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-900">
-                Available Items
+                {t('browse.availableItems')}
               </h2>
               <div className="flex items-center space-x-2">
                 <span className="text-gray-600">
-                  {filteredItems.length} item{filteredItems.length !== 1 ? 's' : ''} found
+                  {filteredItems.length} {t('browse.itemsFound', { count: filteredItems.length })}
                 </span>
               </div>
             </div>
@@ -215,11 +215,10 @@ export default function BrowsePage() {
               <span className="text-4xl">🍽️</span>
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              No food items found
+              {t('browse.noItemsTitle')}
             </h3>
             <p className="text-gray-600 mb-8 max-w-md mx-auto text-lg">
-              Try adjusting your search filters or check back later for new donations. 
-              Be the first to share food in your area!
+              {t('browse.noItemsDescription')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <button 
@@ -231,13 +230,13 @@ export default function BrowsePage() {
                 })}
                 className="px-6 py-3 text-green-600 hover:text-green-700 font-semibold border-2 border-green-200 hover:border-green-300 rounded-xl transition-all duration-200 hover:scale-105"
               >
-                Clear all filters
+                {t('browse.clearFilters')}
               </button>
               <a 
-                href="/add-item"
+                href={`/${locale}/add-item`}
                 className="px-8 py-3 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-semibold rounded-xl transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
               >
-                Share Food Instead
+                {t('browse.shareFood')}
               </a>
             </div>
           </div>

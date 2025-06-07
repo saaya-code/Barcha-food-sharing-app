@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import { X, Image as ImageIcon } from 'lucide-react'
 import Image from 'next/image'
 import { uploadImageToCloudinary } from '@/lib/cloudinary'
+import { useTranslations } from 'next-intl'
 
 interface ImageUploadProps {
   onImageUploaded: (imageUrl: string) => void
@@ -21,6 +22,7 @@ export default function ImageUpload({
   const [isUploading, setIsUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const t = useTranslations('imageUpload')
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -28,14 +30,14 @@ export default function ImageUpload({
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      setUploadError('Please select an image file')
+      setUploadError(t('invalidFileType'))
       return
     }
 
     // Validate file size (5MB limit)
     const maxSize = 5 * 1024 * 1024
     if (file.size > maxSize) {
-      setUploadError('Image size must be less than 5MB')
+      setUploadError(t('fileTooLarge'))
       return
     }
 
@@ -47,7 +49,7 @@ export default function ImageUpload({
       onImageUploaded(imageUrl)
     } catch (error) {
       console.error('Upload error:', error)
-      setUploadError('Failed to upload image. Please try again.')
+      setUploadError(t('uploadFailed'))
     } finally {
       setIsUploading(false)
     }
@@ -103,7 +105,7 @@ export default function ImageUpload({
           {isUploading ? (
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-2"></div>
-              <p className="text-sm text-gray-500">Uploading...</p>
+              <p className="text-sm text-gray-500">{t('uploading')}</p>
             </div>
           ) : (
             <div className="text-center">
@@ -111,10 +113,10 @@ export default function ImageUpload({
                 <ImageIcon size={24} className="text-gray-400" />
               </div>
               <p className="text-sm font-medium text-gray-700 mb-1">
-                Click to upload food photo
+                {t('clickToUpload')}
               </p>
               <p className="text-xs text-gray-500">
-                PNG, JPG up to 5MB
+                {t('fileTypes')}
               </p>
             </div>
           )}

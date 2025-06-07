@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { addToFavorites, removeFromFavorites, checkIfFavorited } from '@/lib/supabase'
+import { useTranslations } from 'next-intl'
 
 interface FoodCardProps {
   item: FoodItem
@@ -17,6 +18,7 @@ interface FoodCardProps {
 
 export default function FoodCard({ item, onRequest }: FoodCardProps) {
   const { user } = useAuth()
+  const t = useTranslations()  
   const [isLiked, setIsLiked] = useState(false)
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false)
   const expiryStatus = formatExpiryTime(new Date(item.expiry_date))
@@ -127,14 +129,14 @@ export default function FoodCard({ item, onRequest }: FoodCardProps) {
           variant="secondary" 
           className="absolute top-3 left-3 bg-white/90 text-gray-700 font-medium shadow-sm"
         >
-          {item.food_type.charAt(0).toUpperCase() + item.food_type.slice(1).replace('-', ' ')}
+          {t(`categories.${item.food_type}`, {defaultValue: item.food_type.charAt(0).toUpperCase() + item.food_type.slice(1).replace('-', ' ')})}
         </Badge>
 
         {/* Availability indicator */}
         {!item.is_available && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
         <Badge variant="destructive" className="text-white bg-red-600">
-          No longer available
+          {t('foodCard.noLongerAvailable')}
         </Badge>
           </div>
         )}
@@ -173,7 +175,7 @@ export default function FoodCard({ item, onRequest }: FoodCardProps) {
           {item.pickup_instructions && (
             <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
               <p className="text-xs text-amber-800">
-                <span className="font-semibold">Pickup: </span>
+                <span className="font-semibold">{t('foodCard.pickup')}: </span>
                 {item.pickup_instructions}
               </p>
             </div>
@@ -193,7 +195,7 @@ export default function FoodCard({ item, onRequest }: FoodCardProps) {
           disabled={!item.is_available || isExpired}
           className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50"
         >
-          {!item.is_available ? 'Unavailable' : isExpired ? 'Expired' : 'Request'}
+          {!item.is_available ? t('foodCard.unavailable') : isExpired ? t('foodCard.expired') : t('foodCard.request')}
         </Button>
       </CardFooter>
     </Card>

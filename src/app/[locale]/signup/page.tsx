@@ -3,13 +3,16 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Header from '@/components/Header'
+import { Header } from '@/components/Header'
 import { Mail, Lock, User, Phone, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTranslations, useLocale } from 'next-intl'
 
 export default function SignupPage() {
   const router = useRouter()
   const { signUp, signInWithGoogle, user } = useAuth()
+  const t = useTranslations()
+  const locale = useLocale()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -43,17 +46,17 @@ export default function SignupPage() {
     try {
       // Basic validation
       if (formData.password !== formData.confirmPassword) {
-        setError('Passwords do not match')
+        setError(t('signup.passwordMismatch'))
         return
       }
 
       if (formData.password.length < 6) {
-        setError('Password must be at least 6 characters long')
+        setError(t('signup.passwordTooShort'))
         return
       }
 
       if (!formData.agreeToTerms) {
-        setError('Please agree to the terms and conditions')
+        setError(t('signup.mustAgreeToTerms'))
         return
       }
 
@@ -69,16 +72,16 @@ export default function SignupPage() {
 
       if (signUpError) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setError((signUpError as any).message)
+        setError((signUpError as any).message || t('signup.signupFailed'))
         return
       }
 
       // Success - user will be redirected by useEffect when user state updates
       alert('Account created successfully! Welcome to Barcha!.')
-      router.push('/')
+      router.push(`/${locale}`)
     } catch (error) {
       console.error('Signup error:', error)
-      alert('Signup failed. Please try again.')
+      setError(t('signup.unexpectedError'))
     } finally {
       setIsLoading(false)
     }
@@ -91,12 +94,12 @@ export default function SignupPage() {
       
       if (error) {
         console.error('Google sign-in error:', error)
-        setError('Failed to sign in with Google. Please try again.')
+        setError(t('signup.googleSignUpFailed'))
       }
       // The redirect will be handled by the OAuth flow
     } catch (error) {
       console.error('Google sign-in error:', error)
-      setError('An unexpected error occurred during Google sign-in.')
+      setError(t('signup.googleUnexpectedError'))
     }
   }
 
@@ -111,8 +114,8 @@ export default function SignupPage() {
               <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-white font-bold text-2xl">B</span>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">Join Barsha</h2>
-              <p className="text-gray-600 mt-2">Create your account and start sharing food</p>
+              <h2 className="text-2xl font-bold text-gray-900">{t('signup.title')}</h2>
+              <p className="text-gray-600 mt-2">{t('signup.subtitle')}</p>
             </div>
 
             {error && (
@@ -124,14 +127,14 @@ export default function SignupPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name
+                  {t('signup.fullNameLabel')}
                 </label>
                 <div className="relative">
                   <User size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   <input
                     type="text"
                     required
-                    placeholder="Your full name"
+                    placeholder={t('signup.fullNamePlaceholder')}
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white shadow-sm text-gray-900 placeholder-gray-500"
@@ -141,14 +144,14 @@ export default function SignupPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
+                  {t('signup.emailLabel')}
                 </label>
                 <div className="relative">
                   <Mail size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   <input
                     type="email"
                     required
-                    placeholder="your.email@example.com"
+                    placeholder={t('signup.emailPlaceholder')}
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white shadow-sm text-gray-900 placeholder-gray-500"
@@ -158,13 +161,13 @@ export default function SignupPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  WhatsApp Number (Optional)
+                  {t('signup.whatsappLabel')}
                 </label>
                 <div className="relative">
                   <Phone size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   <input
                     type="tel"
-                    placeholder="+216 XX XXX XXX"
+                    placeholder={t('signup.whatsappPlaceholder')}
                     value={formData.whatsappNumber}
                     onChange={(e) => handleInputChange('whatsappNumber', e.target.value)}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white shadow-sm text-gray-900 placeholder-gray-500"
@@ -177,14 +180,14 @@ export default function SignupPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Password
+                  {t('signup.passwordLabel')}
                 </label>
                 <div className="relative">
                   <Lock size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
-                    placeholder="Create a password"
+                    placeholder={t('signup.passwordPlaceholder')}
                     value={formData.password}
                     onChange={(e) => handleInputChange('password', e.target.value)}
                     className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white shadow-sm text-gray-900 placeholder-gray-500"
@@ -201,14 +204,14 @@ export default function SignupPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Confirm Password
+                  {t('signup.confirmPasswordLabel')}
                 </label>
                 <div className="relative">
                   <Lock size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
                     required
-                    placeholder="Confirm your password"
+                    placeholder={t('signup.confirmPasswordPlaceholder')}
                     value={formData.confirmPassword}
                     onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                     className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white shadow-sm text-gray-900 placeholder-gray-500"
@@ -234,14 +237,7 @@ export default function SignupPage() {
                   className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded mt-1"
                 />
                 <label htmlFor="agree-terms" className="ml-2 block text-sm text-gray-600">
-                  I agree to the{' '}
-                  <a href="#" className="text-green-600 hover:text-green-700 font-medium">
-                    Terms of Service
-                  </a>{' '}
-                  and{' '}
-                  <a href="#" className="text-green-600 hover:text-green-700 font-medium">
-                    Privacy Policy
-                  </a>
+                  {t('signup.agreeToTerms')}
                 </label>
               </div>
 
@@ -254,7 +250,7 @@ export default function SignupPage() {
                     : 'bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-offset-2 focus:ring-green-500'
                 } transition-colors`}
               >
-                {isLoading ? 'Creating account...' : 'Create Account'}
+                {isLoading ? t('signup.signingUp') : t('signup.signUp')}
               </button>
 
               <div className="relative">
@@ -262,7 +258,7 @@ export default function SignupPage() {
                   <div className="w-full border-t border-gray-300" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                  <span className="px-2 bg-white text-gray-500">{t('signup.orContinueWith')}</span>
                 </div>
               </div>
 
@@ -277,14 +273,14 @@ export default function SignupPage() {
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
-                Sign up with Google
+                {t('signup.signUpWithGoogle')}
               </button>
             </form>
 
             <div className="mt-6 text-center">
-              <span className="text-gray-600">Already have an account? </span>
-              <Link href="/login" className="text-green-600 hover:text-green-700 font-medium">
-                Sign in here
+              <span className="text-gray-600">{t('signup.hasAccount')} </span>
+              <Link href={`/${locale}/login`} className="text-green-600 hover:text-green-700 font-medium">
+                {t('signup.signInHere')}
               </Link>
             </div>
           </div>

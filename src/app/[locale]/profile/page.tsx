@@ -2,16 +2,19 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Header from '@/components/Header'
+import {Header} from '@/components/Header'
 import { User, Mail, Phone, Edit2, Heart, Package } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { getUserProfile, updateUserProfile, getUserFoodItems } from '@/lib/supabase'
 import { FoodItem } from '@/types'
 import FoodCard from '@/components/FoodCard'
+import { useTranslations, useLocale } from 'next-intl'
 
 export default function ProfilePage() {
   const router = useRouter()
   const { user, signOut, loading: authLoading } = useAuth()
+  const t = useTranslations()
+  const locale = useLocale()
   const [isLoading, setIsLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)

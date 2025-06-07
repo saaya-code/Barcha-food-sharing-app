@@ -1,61 +1,9 @@
 'use client'
 
-import Header from '@/components/Header'
+import { Header } from '@/components/Header'
 import { ChevronDown, ChevronUp, Heart, Shield, Users, Leaf } from 'lucide-react'
 import { useState } from 'react'
-
-const faqs = [
-  {
-    question: "What is Barsha?",
-    answer: "Barsha is a community-driven platform that connects people who have surplus food with those who can use it. Our mission is to reduce food waste while helping build stronger communities across Tunisia."
-  },
-  {
-    question: "Is it safe to eat food shared through Barsha?",
-    answer: "Food safety is our top priority. We encourage all users to follow basic food safety guidelines: only share food that you would eat yourself, clearly indicate expiry dates, and use proper storage. However, users are responsible for their own judgment when accepting food."
-  },
-  {
-    question: "How do I know if food is still good?",
-    answer: "Always check the expiry date and use your senses - look for any signs of spoilage like unusual smell, color changes, or texture. When in doubt, don't consume the food. Trust your instincts and prioritize safety."
-  },
-  {
-    question: "What types of food can I share?",
-    answer: "You can share most types of food including baked goods, fruits, vegetables, cooked meals, and packaged items. Please be honest about the food's condition and how long it's been prepared or opened."
-  },
-  {
-    question: "How does the pickup process work?",
-    answer: "Once you request an item, you'll receive the donor's contact information. Coordinate directly with them to arrange pickup time and location. Be respectful of their time and follow any pickup instructions they've provided."
-  },
-  {
-    question: "Is Barsha free to use?",
-    answer: "Yes! Barsha is completely free for all users. We believe that sharing food and reducing waste should be accessible to everyone in our community."
-  },
-  {
-    question: "What should I do if I can't pick up food I requested?",
-    answer: "Please contact the donor as soon as possible to let them know. This allows them to offer the food to someone else and helps maintain trust in our community."
-  },
-  {
-    question: "Can I share food from my restaurant or business?",
-    answer: "Absolutely! Restaurants, cafes, bakeries, and other food businesses are welcome to share their surplus food. This is a great way to reduce waste and support your local community."
-  },
-  {
-    question: "How can I ensure my privacy?",
-    answer: "You control what contact information you share. You can choose to provide a phone number, WhatsApp, or email. We recommend meeting in public places for pickup when possible."
-  },
-  {
-    question: "What if I have a bad experience with someone?",
-    answer: "If you encounter any issues, please let us know. We're committed to maintaining a positive and respectful community. Serious violations of our community guidelines may result in account restrictions."
-  }
-]
-
-const safetyTips = [
-  "Only share food that you would eat yourself",
-  "Check expiry dates and be honest about them",
-  "Store food properly before sharing",
-  "Use your senses - look, smell, and check texture",
-  "When in doubt, throw it out",
-  "Meet in safe, public locations when possible",
-  "Be respectful of pickup times and arrangements"
-]
+import { useTranslations } from 'next-intl'
 
 function FAQItem({ question, answer, isOpen, onClick }: {
   question: string
@@ -87,6 +35,61 @@ function FAQItem({ question, answer, isOpen, onClick }: {
 
 export default function FAQPage() {
   const [openItems, setOpenItems] = useState<number[]>([])
+  const t = useTranslations()
+
+  // Get translated FAQ data
+  const faqs = [
+    {
+      question: t('faq.questions.whatIsBarcha.question'),
+      answer: t('faq.questions.whatIsBarcha.answer')
+    },
+    {
+      question: t('faq.questions.isSafe.question'),
+      answer: t('faq.questions.isSafe.answer')
+    },
+    {
+      question: t('faq.questions.howToKnowGood.question'),
+      answer: t('faq.questions.howToKnowGood.answer')
+    },
+    {
+      question: t('faq.questions.typesOfFood.question'),
+      answer: t('faq.questions.typesOfFood.answer')
+    },
+    {
+      question: t('faq.questions.pickupProcess.question'),
+      answer: t('faq.questions.pickupProcess.answer')
+    },
+    {
+      question: t('faq.questions.isFree.question'),
+      answer: t('faq.questions.isFree.answer')
+    },
+    {
+      question: t('faq.questions.cantPickup.question'),
+      answer: t('faq.questions.cantPickup.answer')
+    },
+    {
+      question: t('faq.questions.businessFood.question'),
+      answer: t('faq.questions.businessFood.answer')
+    },
+    {
+      question: t('faq.questions.privacy.question'),
+      answer: t('faq.questions.privacy.answer')
+    },
+    {
+      question: t('faq.questions.badExperience.question'),
+      answer: t('faq.questions.badExperience.answer')
+    }
+  ]
+
+  // Get translated safety tips
+  const safetyTips = [
+    t('faq.safetyTips.0'),
+    t('faq.safetyTips.1'),
+    t('faq.safetyTips.2'),
+    t('faq.safetyTips.3'),
+    t('faq.safetyTips.4'),
+    t('faq.safetyTips.5')
+  ]
 
   const toggleItem = (index: number) => {
     setOpenItems(prev => 
@@ -107,9 +110,9 @@ export default function FAQPage() {
           <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-6">
             <span className="text-3xl">❓</span>
           </div>
-          <h1 className="text-5xl font-bold mb-6">Frequently Asked Questions</h1>
+          <h1 className="text-5xl font-bold mb-6">{t('faq.title')}</h1>
           <p className="text-xl opacity-90 max-w-2xl mx-auto">
-            Everything you need to know about using Barsha safely and effectively
+            {t('faq.subtitle')}
           </p>
         </div>
       </section>
@@ -121,11 +124,11 @@ export default function FAQPage() {
             <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
               <span className="text-white text-2xl">🌱</span>
             </div>
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-4">Our Mission</h2>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-4">
+              {t('home.mission.title')}
+            </h2>
             <p className="text-gray-600 text-lg leading-relaxed">
-              Barsha aims to create a more sustainable Tunisia by connecting communities 
-              through food sharing. Every shared meal reduces food waste and strengthens the bonds 
-              between neighbors, building a more caring and environmentally conscious community.
+              {t('home.mission.description')}
             </p>
           </div>
           
@@ -135,9 +138,9 @@ export default function FAQPage() {
               <div className="bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-md">
                 <Users className="text-green-600" size={32} />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">How to Donate Food</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{t('home.howItWorks.donate.title')}</h3>
               <p className="text-gray-600 text-sm">
-                Post your surplus food with details about quantity, expiry, and pickup instructions.
+                {t('home.howItWorks.donate.description')}
               </p>
             </div>
             
@@ -145,9 +148,9 @@ export default function FAQPage() {
               <div className="bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-md">
                 <Heart className="text-blue-600" size={32} />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">How to Request Food</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{t('home.howItWorks.request.title')}</h3>
               <p className="text-gray-600 text-sm">
-                Browse available items and contact donors directly to arrange pickup.
+                {t('home.howItWorks.request.description')}
               </p>
             </div>
             
@@ -155,9 +158,9 @@ export default function FAQPage() {
               <div className="bg-gradient-to-br from-amber-100 to-yellow-100 rounded-xl w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-md">
                 <Shield className="text-amber-600" size={32} />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Food Safety Guidelines</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{t('home.howItWorks.safety.title')}</h3>
               <p className="text-gray-600 text-sm">
-                Follow our safety guidelines to ensure all shared food is safe and fresh.
+                {t('home.howItWorks.safety.description')}
               </p>
             </div>
           </div>
@@ -166,9 +169,11 @@ export default function FAQPage() {
         {/* Why Barsha Section */}
         <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-xl border border-white/20 p-8 mb-8">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">Why Choose Barsha?</h2>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+              {t('home.whyChoose.title')}
+            </h2>
             <p className="text-gray-600 text-lg leading-relaxed">
-              Join thousands of Tunisians who are making a difference in their communities
+              {t('home.whyChoose.subtitle')}
             </p>
           </div>
           
@@ -177,9 +182,9 @@ export default function FAQPage() {
               <div className="bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl w-16 h-16 flex items-center justify-center mx-auto mb-3 shadow-md">
                 <Leaf className="text-green-600" size={24} />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Reduce Waste</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{t('home.whyChoose.reduceWaste.title')}</h3>
               <p className="text-gray-600 text-sm">
-                Prevent good food from ending up in landfills
+                {t('home.whyChoose.reduceWaste.description')}
               </p>
             </div>
             
@@ -187,9 +192,9 @@ export default function FAQPage() {
               <div className="bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl w-16 h-16 flex items-center justify-center mx-auto mb-3 shadow-md">
                 <Users className="text-blue-600" size={24} />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Build Community</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{t('home.whyChoose.buildCommunity.title')}</h3>
               <p className="text-gray-600 text-sm">
-                Connect neighbors and strengthen local bonds
+                {t('home.whyChoose.buildCommunity.description')}
               </p>
             </div>
             
@@ -197,9 +202,9 @@ export default function FAQPage() {
               <div className="bg-gradient-to-br from-red-100 to-pink-100 rounded-xl w-16 h-16 flex items-center justify-center mx-auto mb-3 shadow-md">
                 <Heart className="text-red-600" size={24} />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Help Others</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{t('home.whyChoose.helpOthers.title')}</h3>
               <p className="text-gray-600 text-sm">
-                Support those who could benefit from shared meals
+                {t('home.whyChoose.helpOthers.description')}
               </p>
             </div>
           </div>
@@ -211,7 +216,9 @@ export default function FAQPage() {
             <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center mr-4 shadow-lg">
               <Shield className="text-white" size={20} />
             </div>
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Food Safety Guidelines</h2>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+              {t('faq.safetyTitle')}
+            </h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -227,15 +234,16 @@ export default function FAQPage() {
           
           <div className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl">
             <p className="text-amber-800 text-sm">
-              <strong>Remember:</strong> When in doubt about food safety, it&apos;s always better to 
-              err on the side of caution. Trust your judgment and prioritize your health.
+              <strong>{t('common.remember')}:</strong> {t('common.safetyReminder')}
             </p>
           </div>
         </div>
 
         {/* FAQ Items */}
         <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-xl border border-white/20 p-8">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-6">Common Questions</h2>
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-6">
+            {t('common.commonQuestions')}
+          </h2>
           
           <div className="space-y-4">
             {faqs.map((faq, index) => (
@@ -256,17 +264,16 @@ export default function FAQPage() {
             <span className="text-white text-2xl">💬</span>
           </div>
           <h3 className="text-xl font-bold text-gray-900 mb-4">
-            Still have questions?
+            {t('common.stillHaveQuestions')}
           </h3>
           <p className="text-gray-600 mb-4">
-            We&apos;re here to help! If you can&apos;t find the answer you&apos;re looking for, 
-            feel free to reach out to our team.
+            {t('common.contactDescription')}
           </p>
           <a 
             href="mailto:support@barsha.tn" 
             className="inline-flex items-center bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg"
           >
-            Contact Support
+            {t('common.contactSupport')}
           </a>
         </div>
       </main>

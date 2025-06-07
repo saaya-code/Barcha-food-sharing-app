@@ -3,13 +3,16 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Header from '@/components/Header'
+import { Header } from '@/components/Header'
 import { useAuth } from '@/contexts/AuthContext'
 import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react'
+import { useTranslations, useLocale } from 'next-intl'
 
 export default function LoginPage() {
   const router = useRouter()
   const { signIn, signInWithGoogle, user, loading } = useAuth()
+  const t = useTranslations()
+  const locale = useLocale()
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -40,13 +43,13 @@ export default function LoginPage() {
       
       if (error) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setError((error as any).message || 'Login failed. Please check your credentials.')
+        setError((error as any).message || t('login.loginFailed'))
       } else {
-        router.push('/')
+        router.push(`/${locale}`)
       }
     } catch (error) {
       console.error('Login error:', error)
-      setError('An unexpected error occurred. Please try again.')
+      setError(t('login.unexpectedError'))
     } finally {
       setIsLoading(false)
     }
@@ -59,12 +62,12 @@ export default function LoginPage() {
       
       if (error) {
         console.error('Google sign-in error:', error)
-        setError('Failed to sign in with Google. Please try again.')
+        setError(t('login.googleSignInFailed'))
       }
       // The redirect will be handled by the OAuth flow
     } catch (error) {
       console.error('Google sign-in error:', error)
-      setError('An unexpected error occurred during Google sign-in.')
+      setError(t('login.googleUnexpectedError'))
     }
   }
 
@@ -87,8 +90,8 @@ export default function LoginPage() {
               <div className="w-16 h-16 bg-gradient-to-br from-green-600 via-emerald-600 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <span className="text-white font-bold text-2xl">🌾</span>
               </div>
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Welcome back</h2>
-              <p className="text-gray-600 mt-2">Sign in to your Barcha account</p>
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">{t('login.title')}</h2>
+              <p className="text-gray-600 mt-2">{t('login.subtitle')}</p>
             </div>
 
             {error && (
@@ -101,14 +104,14 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Email Address
+                  {t('login.emailLabel')}
                 </label>
                 <div className="relative">
                   <Mail size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                   <input
                     type="email"
                     required
-                    placeholder="your.email@example.com"
+                    placeholder={t('login.emailPlaceholder')}
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:shadow-md text-gray-900 placeholder-gray-500"
@@ -118,14 +121,14 @@ export default function LoginPage() {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Password
+                  {t('login.passwordLabel')}
                 </label>
                 <div className="relative">
                   <Lock size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     required
-                    placeholder="Enter your password"
+                    placeholder={t('login.passwordPlaceholder')}
                     value={formData.password}
                     onChange={(e) => handleInputChange('password', e.target.value)}
                     className="w-full pl-10 pr-12 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white shadow-sm transition-all duration-200 hover:shadow-md text-gray-900 placeholder-gray-500"
@@ -149,13 +152,13 @@ export default function LoginPage() {
                     className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
                   />
                   <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-600 font-medium">
-                    Remember me
+                    {t('login.rememberMe')}
                   </label>
                 </div>
 
                 <div className="text-sm">
                   <a href="#" className="text-green-600 hover:text-green-700 font-semibold transition-colors">
-                    Forgot password?
+                    {t('login.forgotPassword')}
                   </a>
                 </div>
               </div>
@@ -172,10 +175,10 @@ export default function LoginPage() {
                 {isLoading ? (
                   <div className="flex items-center justify-center space-x-2">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span>Signing in...</span>
+                    <span>{t('login.signingIn')}</span>
                   </div>
                 ) : (
-                  'Sign In'
+                  t('login.signIn')
                 )}
               </button>
 
@@ -184,7 +187,7 @@ export default function LoginPage() {
                   <div className="w-full border-t border-gray-300" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500 font-medium">Or continue with</span>
+                  <span className="px-2 bg-white text-gray-500 font-medium">{t('login.orContinueWith')}</span>
                 </div>
               </div>
 
@@ -199,14 +202,14 @@ export default function LoginPage() {
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
-                Sign in with Google
+                {t('login.signInWithGoogle')}
               </button>
             </form>
 
             <div className="mt-8 text-center">
-              <span className="text-gray-600">Don&apos;t have an account? </span>
-              <Link href="/signup" className="text-green-600 hover:text-green-700 font-semibold transition-colors">
-                Sign up here
+              <span className="text-gray-600">{t('login.noAccount')} </span>
+              <Link href={`/${locale}/signup`} className="text-green-600 hover:text-green-700 font-semibold transition-colors">
+                {t('login.signUpHere')}
               </Link>
             </div>
           </div>
@@ -216,4 +219,4 @@ export default function LoginPage() {
   )
 }
 
-  
+

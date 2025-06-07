@@ -1,16 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { getUserFavorites, createFoodRequest } from '@/lib/supabase'
 import { FoodItem } from '@/types'
-import Header from '@/components/Header'
+import { Header } from '@/components/Header'
 import FoodCard from '@/components/FoodCard'
 import RequestModal from '@/components/RequestModal'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Heart } from 'lucide-react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 interface FavoriteItem {
   id: string
@@ -22,19 +23,14 @@ interface FavoriteItem {
 
 export default function FavoritesPage() {
   const { user, loading } = useAuth()
+  const t = useTranslations()
   const [favorites, setFavorites] = useState<FavoriteItem[]>([])
   const [loadingFavorites, setLoadingFavorites] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [requestModalOpen, setRequestModalOpen] = useState(false)
-  const [selectedFoodItem, setSelectedFoodItem] = useState<FoodItem | null>(null)
+  const [selectedFoodItem, setSelectedFoodItem] = useState<FavoriteItem | null>(null)
 
-  useEffect(() => {
-    if (user) {
-      loadFavorites()
-    }
-  }, [user, loadFavorites])
-
-  const loadFavorites = async () => {
+  const loadFavorites = useCallback(async () => {
     if (!user) return
 
     try {
@@ -42,18 +38,24 @@ export default function FavoritesPage() {
       const { data, error } = await getUserFavorites(user.id)
       
       if (error) {
-        setError('Failed to load your favorites')
+        setError(t('favorites.error') || 'Failed to load your favorites')
         console.error('Error loading favorites:', error)
       } else {
         setFavorites(data || [])
       }
     } catch (err) {
-      setError('An unexpected error occurred')
+      setError(t('common.error') || 'An unexpected error occurred')
       console.error('Error:', err)
     } finally {
       setLoadingFavorites(false)
     }
-  }
+  }, [user, t])
+
+  useEffect(() => {
+    if (user) {
+      loadFavorites()
+    }
+  }, [user, loadFavorites])
 
   const handleRequestFood = (item: FoodItem) => {
     setSelectedFoodItem(item)
@@ -97,7 +99,7 @@ export default function FavoritesPage() {
         <div className="flex items-center justify-center min-h-[50vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading...</p>
+            <p className="text-gray-600">{t('common.loading')}</p>
           </div>
         </div>
       </div>
@@ -111,11 +113,11 @@ export default function FavoritesPage() {
         <div className="flex items-center justify-center min-h-[50vh]">
           <Card className="w-full max-w-md">
             <CardContent className="p-8 text-center">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Sign In Required</h2>
-              <p className="text-gray-600 mb-6">You need to sign in to view your favorites.</p>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">{t('auth.signInRequired')}</h2>
+              <p className="text-gray-600 mb-6">{t('favorites.mustBeLoggedIn')}</p>
               <Link href="/login">
                 <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700">
-                  Sign In
+                  {t('auth.signIn')}
                 </Button>
               </Link>
             </CardContent>
@@ -134,9 +136,9 @@ export default function FavoritesPage() {
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <Heart className="text-red-500" size={32} />
-            <h1 className="text-3xl font-bold text-gray-900">My Favorites</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{t('favorites.title')}</h1>
           </div>
-          <p className="text-gray-600">Food items you've saved for later</p>
+          <p className="text-gray-600">{t('favorites.subtitle')}</p>
         </div>
 
         {/* Error Message */}
@@ -151,7 +153,7 @@ export default function FavoritesPage() {
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading your favorites...</p>
+              <p className="text-gray-600">{t('favorites.loadingFavorites')}</p>
             </div>
           </div>
         ) : favorites.length === 0 ? (
@@ -159,11 +161,11 @@ export default function FavoritesPage() {
           <Card className="text-center py-12">
             <CardContent>
               <div className="text-6xl mb-4">💔</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No favorites yet</h3>
-              <p className="text-gray-600 mb-6">Start browsing food items and save your favorites by clicking the heart icon.</p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">{t('favorites.noFavorites')}</h3>
+              <p className="text-gray-600 mb-6">{t('favorites.exploreFoods')}</p>
               <Link href="/browse">
                 <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700">
-                  Browse Food Items
+                  {t('favorites.browseFoods')}
                 </Button>
               </Link>
             </CardContent>

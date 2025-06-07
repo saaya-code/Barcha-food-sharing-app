@@ -1,8 +1,26 @@
 import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import createIntlMiddleware from 'next-intl/middleware'
+
+const locales = ['en', 'ar']
+const defaultLocale = 'en'
+
+const intlMiddleware = createIntlMiddleware({
+  locales,
+  defaultLocale,
+  localePrefix: 'always'
+})
 
 export async function middleware(req: NextRequest) {
+  // Handle internationalization first - this should handle the root redirect
+  const intlResponse = intlMiddleware(req)
+  
+  // If intl middleware wants to redirect, return that response
+  if (intlResponse.status !== 200) {
+    return intlResponse
+  }
+
   const res = NextResponse.next()
   const supabase = createMiddlewareClient({ req, res })
 
@@ -12,20 +30,25 @@ export async function middleware(req: NextRequest) {
   } = await supabase.auth.getSession()
 
   // Handle auth callback - allow it to proceed without checks
-  if (req.nextUrl.pathname.startsWith('/auth/callback')) {
+  if (req.nextUrl.pathname.includes('/auth/callback')) {
     return res
   }
 
   // Optional: Add protected routes logic here if needed
   // For example, protect /profile, /add-item, etc.
-  const protectedRoutes = ['/profile', '/add-item', '/requests']
+  const protectedRoutes = ['/profile', '/add-item', '/requests', '/my-items', '/favorites']
   const isProtectedRoute = protectedRoutes.some(route => 
-    req.nextUrl.pathname.startsWith(route)
+    req.nextUrl.pathname.includes(route)
   )
 
   if (isProtectedRoute && !session) {
+    // Get the current locale from the pathname
+    const currentLocale = locales.find(locale => 
+      req.nextUrl.pathname.startsWith(`/${locale}/`)
+    ) || defaultLocale
+    
     // Redirect to login if accessing protected route without session
-    const redirectUrl = new URL('/login', req.url)
+    const redirectUrl = new URL(`/${currentLocale}/login`, req.url)
     redirectUrl.searchParams.set('redirect', req.nextUrl.pathname)
     return NextResponse.redirect(redirectUrl)
   }
