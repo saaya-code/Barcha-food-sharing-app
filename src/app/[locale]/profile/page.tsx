@@ -8,13 +8,12 @@ import { useAuth } from '@/contexts/AuthContext'
 import { getUserProfile, updateUserProfile, getUserFoodItems } from '@/lib/supabase'
 import { FoodItem } from '@/types'
 import FoodCard from '@/components/FoodCard'
-import { useTranslations, useLocale } from 'next-intl'
+import { useTranslations } from 'next-intl'
 
 export default function ProfilePage() {
   const router = useRouter()
   const { user, signOut, loading: authLoading } = useAuth()
   const t = useTranslations()
-  const locale = useLocale()
   const [isLoading, setIsLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -51,7 +50,7 @@ export default function ProfilePage() {
         const { data: profileData, error: profileError } = await getUserProfile(user.id)
         if (profileError) {
           console.error('Profile error:', profileError)
-          throw new Error(`Failed to load profile: ${profileError.message}`)
+          throw new Error(`Failed to load profile: ${profileError}`)
         }
         
         if (profileData) {
@@ -79,13 +78,13 @@ export default function ProfilePage() {
         if (itemsError) {
           console.error('Items error:', itemsError)
           // Don't throw error for items, just log it
-          console.warn('Failed to load user items:', itemsError.message)
+          console.warn('Failed to load user items:', itemsError)
         }
         
         setUserItems(itemsData || [])
       } catch (error) {
         console.error('Error loading user data:', error)
-        const errorMessage = error instanceof Error ? error.message : 'Failed to load profile data'
+        const errorMessage = error instanceof Error ? error.message : t('profile.failedToLoadProfile')
         setError(errorMessage)
         
         // Set fallback profile data from user metadata
@@ -107,7 +106,7 @@ export default function ProfilePage() {
     }
     
     loadUserData()
-  }, [user, router, authLoading])
+  }, [user, router, authLoading, t])
 
   const handleSaveProfile = async () => {
     try {
@@ -126,7 +125,7 @@ export default function ProfilePage() {
       setIsEditing(false)
     } catch (error) {
       console.error('Error updating profile:', error)
-      setError('Failed to update profile')
+      setError(t('profile.failedToUpdateProfile'))
     } finally {
       setIsSaving(false)
     }
@@ -148,7 +147,10 @@ export default function ProfilePage() {
       <div className="min-h-screen bg-gray-50">
         <Header />
         <div className="flex items-center justify-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">{t('profile.loadingProfile')}</p>
+          </div>
         </div>
       </div>
     )
@@ -186,8 +188,7 @@ export default function ProfilePage() {
         )}
         
         {/* Profile Header */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex items-start justify-between mb-6">
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">            <div className="flex items-start justify-between mb-6">
             <div className="flex items-center space-x-4">
               <div className="w-20 h-20 bg-green-600 rounded-full flex items-center justify-center">
                 <User size={32} className="text-white" />
@@ -201,7 +202,7 @@ export default function ProfilePage() {
                   <div className="flex items-center space-x-1 text-green-600">
                     <Heart size={16} />
                     <span className="text-sm font-medium">
-                      {profile.total_donations} donations
+                      {profile.total_donations} {t('profile.donations')}
                     </span>
                   </div>
                 </div>
@@ -213,13 +214,13 @@ export default function ProfilePage() {
                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
               >
                 <Edit2 size={16} />
-                <span>{isEditing ? 'Cancel' : 'Edit Profile'}</span>
+                <span>{isEditing ? t('common.cancel') : t('profile.editProfile')}</span>
               </button>
               <button
                 onClick={handleSignOut}
                 className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
               >
-                Sign Out
+                {t('profile.signOut')}
               </button>
             </div>
           </div>
@@ -234,7 +235,7 @@ export default function ProfilePage() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name
+                  {t('profile.fullName')}
                 </label>
                 <input
                   type="text"
@@ -245,14 +246,14 @@ export default function ProfilePage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  WhatsApp Number
+                  {t('profile.whatsappNumber')}
                 </label>
                 <input
                   type="tel"
                   value={editForm.whatsapp_number}
                   onChange={(e) => setEditForm(prev => ({ ...prev, whatsapp_number: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="+1234567890"
+                  placeholder={t('profile.whatsappPlaceholder')}
                 />
               </div>
               <div className="flex space-x-3">
@@ -261,13 +262,13 @@ export default function ProfilePage() {
                   disabled={isSaving}
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
                 >
-                  {isSaving ? 'Saving...' : 'Save Changes'}
+                  {isSaving ? t('profile.saving') : t('profile.saveChanges')}
                 </button>
                 <button
                   onClick={() => setIsEditing(false)}
                   className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
                 >
-                  Cancel
+                  {t('profile.cancel')}
                 </button>
               </div>
             </div>
@@ -276,16 +277,16 @@ export default function ProfilePage() {
               <div className="flex items-center space-x-3">
                 <Mail size={20} className="text-gray-400" />
                 <div>
-                  <p className="text-sm text-gray-500">Email</p>
+                  <p className="text-sm text-gray-500">{t('profile.email')}</p>
                   <p className="font-medium text-black">{profile.email}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone size={20} className="text-gray-400" />
                 <div>
-                  <p className="text-sm text-gray-500">WhatsApp</p>
+                  <p className="text-sm text-gray-500">{t('profile.whatsappNumber')}</p>
                   <p className="font-medium text-black">
-                    {profile.whatsapp_number || 'Not provided'}
+                    {profile.whatsapp_number || t('profile.notProvided')}
                   </p>
                 </div>
               </div>
@@ -298,13 +299,13 @@ export default function ProfilePage() {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900 flex items-center space-x-2">
               <Package size={24} />
-              <span>My Food Items</span>
+              <span>{t('profile.myFoodItems')}</span>
             </h2>
             <button
               onClick={() => router.push('/add-item')}
               className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
-              Add New Item
+              {t('profile.addNewItem')}
             </button>
           </div>
 
@@ -312,16 +313,16 @@ export default function ProfilePage() {
             <div className="text-center py-12">
               <Package size={48} className="text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-500 mb-2">
-                No food items yet
+                {t('profile.noFoodItems')}
               </h3>
               <p className="text-gray-400 mb-4">
-                Start sharing food with your community
+                {t('profile.noFoodItemsDescription')}
               </p>
               <button
                 onClick={() => router.push('/add-item')}
                 className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
               >
-                Add Your First Item
+                {t('profile.addFirstItem')}
               </button>
             </div>
           ) : (

@@ -166,7 +166,58 @@
     "subtitle": "Food items you've saved for later",
     "noFavorites": "You haven't favorited any items yet",
     "exploreFoods": "Explore available foods and save your favorites",
-    "browseFoods": "Browse Foods"
+    "browseFoods": "Browse Foods",
+    "error": "Failed to load your favorites",
+    "mustBeLoggedIn": "You must be logged in to view your favorites.",
+    "loadingFavorites": "Loading your favorites..."
+  },
+  "requests": {
+    "title": "My Requests",
+    "tabs": {
+      "all": "All",
+      "pending": "Pending",
+      "approved": "Approved",
+      "completed": "Completed"
+    },
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "declined": "Declined",
+      "completed": "Completed",
+      "waitingResponse": "Waiting for donor's response...",
+      "thankYou": "Thank you for helping reduce food waste!",
+      "requestDeclined": "This request was declined by the donor."
+    },
+    "error": {
+      "loadFailed": "Failed to load requests",
+      "updateFailed": "Failed to update request status"
+    },
+    "empty": {
+      "noRequests": "No requests found",
+      "noRequestsDescription": "You haven't made any food requests yet. Browse available items to get started.",
+      "noStatusRequests": "No {status} requests found",
+      "noStatusRequestsDesc": "You don't have any {status} requests yet.",
+      "startBrowsing": "Start browsing available food items to make your first request.",
+      "browseFoodItems": "Browse Food Items",
+      "browseFoods": "Browse Foods"
+    },
+    "details": {
+      "requestedOn": "Requested on",
+      "message": "Message",
+      "contact": "Contact",
+      "pickupTime": "Pickup Time",
+      "quantity": "Quantity",
+      "location": "Location",
+      "donor": "Donor"
+    },
+    "actions": {
+      "approve": "Approve",
+      "decline": "Decline",
+      "markCompleted": "Mark as Completed",
+      "contact": "Contact Requester",
+      "callDonor": "Call Donor"
+    },
+    "loading": "Loading requests..."
   },
   "notifications": {
     "title": "Notifications",
@@ -264,8 +315,7 @@
   },
   "topDonors": {
     "title": "Top Donors This Week",
-    "donation": "{{count}} donation",
-    "donation_plural": "{{count}} donations",
+    "donation": "{count, plural, =1 {# donation} other {# donations}}",
     "champion": "Champion",
     "noDonations": "No donations yet this week.",
     "beFirst": "Be the first to share food!",

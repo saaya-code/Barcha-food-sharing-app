@@ -275,7 +275,7 @@ export const removeFromFavorites = async (userId: string, foodItemId: string) =>
 export const getUserFavorites = async (userId: string) => {
   const { data, error } = await supabase
     .from('favorites')
-    .select(`²
+    .select(`
       *,
       food_items (
         id,

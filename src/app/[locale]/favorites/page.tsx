@@ -28,7 +28,7 @@ export default function FavoritesPage() {
   const [loadingFavorites, setLoadingFavorites] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [requestModalOpen, setRequestModalOpen] = useState(false)
-  const [selectedFoodItem, setSelectedFoodItem] = useState<FavoriteItem | null>(null)
+  const [selectedFoodItem, setSelectedFoodItem] = useState<FoodItem | null>(null)
 
   const loadFavorites = useCallback(async () => {
     if (!user) return

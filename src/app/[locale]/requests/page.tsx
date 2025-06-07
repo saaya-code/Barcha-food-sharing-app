@@ -2,46 +2,48 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Header from '@/components/Header'
+import {Header} from '@/components/Header'
 import { Clock, CheckCircle, XCircle, MessageSquare, Phone, User } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { getUserRequests, updateRequestStatus } from '@/lib/supabase'
 import { FoodRequest } from '@/types/database'
-
-const statusConfig: Record<string, {
-  color: string
-  icon: React.ComponentType<{ size: number; className?: string }>
-  label: string
-}> = {
-  pending: {
-    color: 'bg-yellow-100 text-yellow-800',
-    icon: Clock,
-    label: 'Pending'
-  },
-  approved: {
-    color: 'bg-green-100 text-green-800',
-    icon: CheckCircle,
-    label: 'Approved'
-  },
-  declined: {
-    color: 'bg-red-100 text-red-800',
-    icon: XCircle,
-    label: 'Declined'
-  },
-  completed: {
-    color: 'bg-blue-100 text-blue-800',
-    icon: CheckCircle,
-    label: 'Completed'
-  }
-}
+import { useTranslations } from 'next-intl'
 
 export default function RequestsPage() {
   const router = useRouter()
   const { user } = useAuth()
+  const t = useTranslations()
   const [requests, setRequests] = useState<FoodRequest[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'approved' | 'completed'>('all')
+
+  const statusConfig: Record<string, {
+    color: string
+    icon: React.ComponentType<{ size: number; className?: string }>
+    label: string
+  }> = {
+    pending: {
+      color: 'bg-yellow-100 text-yellow-800',
+      icon: Clock,
+      label: t('requests.status.pending')
+    },
+    approved: {
+      color: 'bg-green-100 text-green-800',
+      icon: CheckCircle,
+      label: t('requests.status.approved')
+    },
+    declined: {
+      color: 'bg-red-100 text-red-800',
+      icon: XCircle,
+      label: t('requests.status.declined')
+    },
+    completed: {
+      color: 'bg-blue-100 text-blue-800',
+      icon: CheckCircle,
+      label: t('requests.status.completed')
+    }
+  }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const loadRequests = async () => {
@@ -53,7 +55,7 @@ export default function RequestsPage() {
       setRequests(data || [])
     } catch (error) {
       console.error('Error loading requests:', error)
-      setError('Failed to load requests')
+      setError(t('requests.error.loadFailed'))
     } finally {
       setLoading(false)
     }
@@ -83,7 +85,7 @@ export default function RequestsPage() {
       )
     } catch (error) {
       console.error('Error updating request status:', error)
-      setError('Failed to update request status')
+      setError(t('requests.error.updateFailed'))
     }
   }
 
@@ -97,7 +99,10 @@ export default function RequestsPage() {
       <div className="min-h-screen bg-gray-50">
         <Header />
         <div className="flex items-center justify-center py-20">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">{t('common.loading')}</p>
+          </div>
         </div>
       </div>
     )
@@ -109,7 +114,7 @@ export default function RequestsPage() {
       
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">Food Requests</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-6">{t('requests.title')}</h1>
           
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-4">
@@ -129,7 +134,7 @@ export default function RequestsPage() {
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {t(`requests.tabs.${tab}`)}
                 {tab !== 'all' && (
                   <span className="ml-2 bg-gray-200 text-gray-600 px-2 py-1 rounded-full text-xs">
                     {requests.filter(r => r.status === tab).length}
@@ -149,19 +154,19 @@ export default function RequestsPage() {
             <div className="text-center py-12">
               <MessageSquare size={48} className="text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-500 mb-2">
-                {activeTab === 'all' ? 'No requests yet' : `No ${activeTab} requests`}
+                {activeTab === 'all' ? t('requests.empty.noRequests') : t('requests.empty.noStatusRequests', { status: t(`requests.tabs.${activeTab}`) })}
               </h3>
               <p className="text-gray-400 mb-4">
                 {activeTab === 'all' 
-                  ? 'Start browsing food items to make your first request'
-                  : `You don't have any ${activeTab} requests at the moment`
+                  ? t('requests.empty.startBrowsing')
+                  : t('requests.empty.noStatusRequestsDesc', { status: t(`requests.tabs.${activeTab}`) })
                 }
               </p>
               <button
                 onClick={() => router.push('/browse')}
                 className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
               >
-                Browse Food Items
+                {t('requests.empty.browseFoodItems')}
               </button>
             </div>
           ) : (
@@ -187,11 +192,11 @@ export default function RequestsPage() {
                         </div>
                         <p className="text-gray-600 mb-2">{request.message}</p>
                         <div className="flex items-center space-x-4 text-sm text-gray-500">
-                          <span>Requested on {new Date(request.created_at).toLocaleDateString()}</span>
+                          <span>{t('requests.details.requestedOn')} {new Date(request.created_at).toLocaleDateString()}</span>
                           <span>•</span>
-                          <span>Quantity: {request.food_items?.quantity}</span>
+                          <span>{t('requests.details.quantity')}: {request.food_items?.quantity}</span>
                           <span>•</span>
-                          <span>Location: {request.food_items?.location}</span>
+                          <span>{t('requests.details.location')}: {request.food_items?.location}</span>
                         </div>
                       </div>
                     </div>
@@ -216,7 +221,7 @@ export default function RequestsPage() {
                           </p>
                           <div className="flex items-center space-x-2 text-sm text-gray-500">
                             <User size={14} />
-                            <span>Donor: {request.food_items?.donor_name}</span>
+                            <span>{t('requests.details.donor')}: {request.food_items?.donor_name}</span>
                           </div>
                         </div>
                       </div>
@@ -229,7 +234,7 @@ export default function RequestsPage() {
                           onClick={() => handleStatusUpdate(request.id, 'completed')}
                           className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                         >
-                          Mark as Completed
+                          {t('requests.actions.markCompleted')}
                         </button>
                         {request.food_items?.donor_contact && (
                           <a
@@ -237,7 +242,7 @@ export default function RequestsPage() {
                             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
                           >
                             <Phone size={16} />
-                            <span>Call Donor</span>
+                            <span>{t('requests.actions.callDonor')}</span>
                           </a>
                         )}
                       </div>
@@ -245,19 +250,19 @@ export default function RequestsPage() {
 
                     {request.status === 'pending' && (
                       <div className="text-sm text-gray-500">
-                        Waiting for donor response...
+                        {t('requests.status.waitingResponse')}
                       </div>
                     )}
 
                     {request.status === 'completed' && (
                       <div className="text-sm text-green-600">
-                        Thank you for completing this food sharing!
+                        {t('requests.status.thankYou')}
                       </div>
                     )}
 
                     {request.status === 'declined' && (
                       <div className="text-sm text-red-600">
-                        This request was declined by the donor.
+                        {t('requests.status.requestDeclined')}
                       </div>
                     )}
                   </div>

@@ -1,6 +1,7 @@
 {
   "nav": {
     "browse": "تصفح الطعام",
+    "addItem": "إضافة عنصر",
     "home": "الرئيسية",
     "myItems": "عناصري",
     "favorites": "المفضلة",
@@ -166,7 +167,58 @@
     "subtitle": "عناصر الطعام التي حفظتها لاحقاً",
     "noFavorites": "لم تضف أي عناصر للمفضلة بعد",
     "exploreFoods": "استكشف الأطعمة المتاحة واحفظ مفضلتك",
-    "browseFoods": "تصفح الأطعمة"
+    "browseFoods": "تصفح الأطعمة",
+    "error": "فشل في تحميل مفضلتك",
+    "mustBeLoggedIn": "يجب أن تكون مسجل الدخول لعرض مفضلتك.",
+    "loadingFavorites": "تحميل مفضلتك..."
+  },
+  "requests": {
+    "title": "طلباتي",
+    "tabs": {
+      "all": "الكل",
+      "pending": "قيد الانتظار",
+      "approved": "مقبول",
+      "completed": "مكتمل"
+    },
+    "status": {
+      "pending": "قيد الانتظار",
+      "approved": "مقبول",
+      "declined": "مرفوض",
+      "completed": "مكتمل",
+      "waitingResponse": "في انتظار رد المتبرع...",
+      "thankYou": "شكراً لك على المساعدة في تقليل هدر الطعام!",
+      "requestDeclined": "تم رفض هذا الطلب من قبل المتبرع."
+    },
+    "error": {
+      "loadFailed": "فشل في تحميل الطلبات",
+      "updateFailed": "فشل في تحديث حالة الطلب"
+    },
+    "empty": {
+      "noRequests": "لم يتم العثور على طلبات",
+      "noRequestsDescription": "لم تقم بأي طلبات طعام بعد. تصفح العناصر المتاحة للبدء.",
+      "noStatusRequests": "لم يتم العثور على طلبات {status}",
+      "noStatusRequestsDesc": "ليس لديك أي طلبات {status} بعد.",
+      "startBrowsing": "ابدأ في تصفح عناصر الطعام المتاحة لتقديم طلبك الأول.",
+      "browseFoodItems": "تصفح عناصر الطعام",
+      "browseFoods": "تصفح الأطعمة"
+    },
+    "details": {
+      "requestedOn": "طُلب في",
+      "message": "الرسالة",
+      "contact": "الاتصال",
+      "pickupTime": "وقت الاستلام",
+      "quantity": "الكمية",
+      "location": "الموقع",
+      "donor": "المتبرع"
+    },
+    "actions": {
+      "approve": "موافق",
+      "decline": "رفض",
+      "markCompleted": "تحديد كمكتمل",
+      "contact": "الاتصال بالطالب",
+      "callDonor": "اتصل بالمتبرع"
+    },
+    "loading": "تحميل الطلبات..."
   },
   "notifications": {
     "title": "الإشعارات",
@@ -264,8 +316,7 @@
   },
   "topDonors": {
     "title": "أفضل المتبرعين هذا الأسبوع",
-    "donation": "{{count}} تبرع",
-    "donation_plural": "{{count}} تبرعات",
+    "donation": "{count, plural, =0 {لا توجد تبرعات} =1 {تبرع واحد} =2 {تبرعان} other {# تبرعات}}",
     "champion": "البطل",
     "noDonations": "لا توجد تبرعات هذا الأسبوع بعد.",
     "beFirst": "كن أول من يشارك الطعام!",

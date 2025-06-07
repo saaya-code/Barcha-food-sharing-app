@@ -28,9 +28,12 @@ export default function MyItemsPage() {
       try {
         setLoadingItems(true)
         setError(null)
-        const userItems = await getUserFoodItems(user.id)
+        const { data: userItems, error } = await getUserFoodItems(user.id)
+        if (error || !userItems) {
+          throw error || new Error('Failed to fetch user items')
+        }
         setItems(userItems)
-      } catch (err) {
+      } catch (err) { 
         setError(t('myItems.error') || 'Failed to load your items')
         console.error('Error loading user items:', err)
       } finally {
@@ -41,7 +44,7 @@ export default function MyItemsPage() {
     if (user) {
       loadUserItems()
     }
-  }, [user])
+  }, [user, t])
 
   const toggleAvailability = async (itemId: string, currentAvailability: boolean) => {
     try {
